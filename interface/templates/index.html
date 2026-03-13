@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IdeaSmith — Forge Your Ideas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --forge:  #FF4500;
+    --ember:  #FF8C00;
+    --gold:   #FFD700;
+    --ash:    #1A1A18;
+    --iron:   #242420;
+    --steel:  #3A3A34;
+    --smoke:  #6B6B60;
+    --parch:  #F0E8D8;
+    --cream:  #FAF6EE;
+    --green:  #4CAF50;
+    --red:    #e53935;
+    --glow:   0 0 24px rgba(255,69,0,0.35), 0 0 60px rgba(255,69,0,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--ash);
+    color: var(--parch);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 85%, rgba(255,69,0,0.06) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 15%, rgba(255,140,0,0.04) 0%, transparent 45%),
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+    pointer-events: none; z-index: 0;
+  }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(26,26,24,0.93);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--steel);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+  }
+
+  .nav-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem; letter-spacing: 0.1em;
+    background: linear-gradient(135deg, var(--gold), var(--forge));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .nav-tabs { display: flex; }
+
+  .nav-tab {
+    background: none; border: none;
+    color: var(--smoke);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0 1.2rem; height: 56px; cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .nav-tab:hover { color: var(--parch); }
+  .nav-tab.active { color: var(--forge); border-bottom-color: var(--forge); }
+
+  .page { display: none; position: relative; z-index: 1; }
+  .page.active { display: block; }
+
+  .wrapper { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
+
+  header { text-align: center; padding: 2.5rem 0 2rem; }
+
+  .hammer-wrap {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px;
+    background: rgba(255,69,0,0.1); border-radius: 50%;
+    margin-bottom: 1rem;
+    animation: pulse-ring 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,69,0,0.3); }
+    50%       { box-shadow: 0 0 0 12px rgba(255,69,0,0); }
+  }
+
+  .hammer-icon { width: 28px; height: 28px; fill: var(--forge); }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 9vw, 5.5rem);
+    letter-spacing: 0.08em; line-height: 0.9;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--forge) 50%, var(--ember) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .tagline {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic; color: var(--smoke); font-size: 1rem; margin-top: 0.5rem;
+  }
+
+  .divider {
+    display: flex; align-items: center; gap: 1rem; margin: 2rem 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(to right, transparent, var(--steel), transparent);
+  }
+  .divider-icon { color: var(--forge); font-size: 0.9rem; }
+
+  .card {
+    background: var(--iron); border: 1px solid var(--steel);
+    border-radius: 4px; padding: 1.75rem;
+    position: relative; overflow: hidden;
+  }
+
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--forge), var(--ember), var(--forge), transparent);
+    animation: shimmer 4s linear infinite; background-size: 200% 100%;
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  label {
+    display: block; font-size: 0.68rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--smoke); margin-bottom: 0.45rem;
+  }
+
+  textarea, input[type="password"], input[type="text"], select {
+    width: 100%; background: var(--ash); border: 1px solid var(--steel);
+    border-radius: 3px; color: var(--parch);
+    font-family: 'DM Mono', monospace; font-size: 0.88rem;
+    padding: 0.75rem 0.9rem; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s; appearance: none;
+  }
+
+  textarea { min-height: 110px; resize: vertical; }
+
+  textarea:focus, input:focus, select:focus {
+    border-color: var(--forge); box-shadow: 0 0 0 2px rgba(255,69,0,0.12);
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B60' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.9rem center;
+    padding-right: 2.5rem; cursor: pointer;
+  }
+
+  .field-row { display: flex; gap: 0.9rem; margin-top: 1.1rem; align-items: flex-end; }
+  .field-group { flex: 1; margin-top: 1.1rem; }
+
+  .btn-forge {
+    background: linear-gradient(135deg, var(--forge) 0%, var(--ember) 100%);
+    color: var(--ash); border: none; border-radius: 3px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: 0.12em;
+    padding: 0.72rem 2rem; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-forge:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--glow); }
+  .btn-forge:active:not(:disabled) { transform: translateY(0); }
+  .btn-forge:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: var(--steel); color: var(--parch); border: none; border-radius: 3px;
+    font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.06em;
+    padding: 0.55rem 1.1rem; cursor: pointer; transition: background 0.15s; white-space: nowrap;
+  }
+  .btn-secondary:hover { background: #4A4A42; }
+
+  /* ── Settings ── */
+  .settings-wrapper { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
+
+  .settings-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 0.1em; color: var(--parch); margin-bottom: 0.3rem;
+  }
+
+  .settings-sub { font-size: 0.76rem; color: var(--smoke); font-style: italic; margin-bottom: 1.5rem; }
+
+  .agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+
+  .agent-card { background: var(--iron); border: 1px solid var(--steel); border-radius: 4px; overflow: hidden; }
+
+  .agent-header {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.9rem 1.2rem;
+    background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--steel);
+  }
+
+  .agent-icon {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+  }
+
+  .agent-icon.manager   { background: rgba(255,69,0,0.15); }
+  .agent-icon.developer { background: rgba(50,205,50,0.12); }
+
+  .agent-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.05rem; letter-spacing: 0.1em; }
+  .agent-name.manager   { color: var(--forge); }
+  .agent-name.developer { color: var(--green); }
+  .agent-role { font-size: 0.62rem; color: var(--smoke); margin-top: 0.1rem; }
+
+  .agent-body { padding: 1.2rem; }
+  .agent-body .field-group { margin-top: 0.9rem; }
+
+  .provider-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
+
+  .provider-pill {
+    background: var(--ash); border: 1px solid var(--steel); border-radius: 20px;
+    color: var(--smoke); font-size: 0.66rem; letter-spacing: 0.1em;
+    padding: 0.28rem 0.7rem; cursor: pointer;
+    transition: all 0.15s; font-family: 'DM Mono', monospace;
+  }
+
+  .provider-pill:hover { border-color: var(--smoke); color: var(--parch); }
+  .provider-pill.active { border-color: var(--forge); color: var(--forge); background: rgba(255,69,0,0.08); }
+
+  .key-wrap { position: relative; }
+  .key-wrap input { padding-right: 2.8rem; }
+  .eye-btn {
+    position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--smoke); cursor: pointer;
+    font-size: 0.8rem; padding: 0; transition: color 0.15s;
+  }
+  .eye-btn:hover { color: var(--parch); }
+
+  .custom-model-row { display: flex; gap: 0.5rem; margin-top: 0.55rem; }
+  .custom-model-row input { flex: 1; }
+
+  .provider-docs { font-size: 0.66rem; color: var(--smoke); margin-top: 0.45rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .provider-docs a { color: var(--ember); text-decoration: none; }
+  .provider-docs a:hover { text-decoration: underline; }
+  .provider-docs code { color: var(--ember); }
+
+  .save-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    margin-top: 1.4rem;
+    background: rgba(255,69,0,0.05); border: 1px solid rgba(255,69,0,0.18);
+    border-radius: 4px; padding: 0.85rem 1.2rem;
+  }
+  .save-info { font-size: 0.73rem; color: var(--smoke); }
+  .save-info strong { color: var(--parch); }
+
+  /* ── Config chips on forge page ── */
+  .config-preview { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+
+  .config-chip {
+    display: flex; align-items: center; gap: 0.45rem;
+    background: var(--iron); border: 1px solid var(--steel);
+    border-radius: 20px; padding: 0.32rem 0.8rem;
+    font-size: 0.68rem; color: var(--smoke); cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .config-chip:hover { border-color: var(--forge); }
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .chip-dot.manager   { background: var(--forge); }
+  .chip-dot.developer { background: var(--green); }
+  .chip-label { color: var(--parch); font-weight: 500; }
+
+  /* ── Pipeline ── */
+  #pipeline { margin-top: 2rem; display: none; }
+
+  .phase-banner {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: rgba(255,69,0,0.07); border-left: 3px solid var(--forge);
+    padding: 0.6rem 1rem; margin-bottom: 1.5rem;
+    font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ember); border-radius: 0 3px 3px 0;
+  }
+
+  .spinner {
+    width: 13px; height: 13px;
+    border: 2px solid rgba(255,140,0,0.25); border-top-color: var(--ember);
+    border-radius: 50%; animation: spin 0.75s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .tasks-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+    gap: 0.75rem; margin-bottom: 2rem;
+  }
+
+  .task-chip {
+    background: var(--iron); border: 1px solid var(--steel);
+    border-radius: 3px; padding: 0.8rem 1rem;
+    transition: border-color 0.3s; animation: fadeUp 0.35s ease both;
+  }
+  .task-chip.running  { border-color: var(--ember); }
+  .task-chip.approved { border-color: var(--green); }
+  .task-chip.rejected { border-color: var(--red); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .task-type-badge {
+    font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.12rem 0.4rem; border-radius: 2px;
+    margin-bottom: 0.45rem; display: inline-block;
+  }
+  .badge-research { background: rgba(100,149,237,0.18); color: #6495ED; }
+  .badge-design   { background: rgba(186,85,211,0.18);  color: #BA55D3; }
+  .badge-code     { background: rgba(50,205,50,0.18);   color: #32CD32; }
+  .badge-content  { background: rgba(255,215,0,0.18);   color: var(--gold); }
+  .badge-review   { background: rgba(255,140,0,0.18);   color: var(--ember); }
+  .badge-other    { background: rgba(107,107,96,0.18);  color: var(--smoke); }
+
+  .task-title { font-size: 0.8rem; font-weight: 500; color: var(--cream); line-height: 1.35; }
+  .task-status { font-size: 0.66rem; color: var(--smoke); margin-top: 0.35rem; }
+  .task-status.ok  { color: var(--green); }
+  .task-status.bad { color: var(--red); }
+
+  .output-card {
+    background: var(--iron); border: 1px solid var(--steel);
+    border-radius: 3px; overflow: hidden; margin-bottom: 0.75rem;
+    animation: fadeUp 0.35s ease both;
+  }
+
+  .output-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.65rem 1rem; cursor: pointer; user-select: none; gap: 0.5rem;
+  }
+  .output-header:hover { background: rgba(255,255,255,0.02); }
+  .output-header-left { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 0; }
+  .output-title { font-size: 0.8rem; font-weight: 500; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .score-badge { font-size: 0.68rem; font-weight: 500; padding: 0.12rem 0.45rem; border-radius: 2px; flex-shrink: 0; }
+  .score-high { background: rgba(76,175,80,0.18);  color: var(--green); }
+  .score-mid  { background: rgba(255,215,0,0.18);  color: var(--gold); }
+  .score-low  { background: rgba(229,57,53,0.18);  color: var(--red); }
+
+  .chevron { font-size: 0.65rem; color: var(--smoke); transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+
+  .output-body {
+    padding: 1rem; font-size: 0.78rem; line-height: 1.75;
+    color: var(--parch); white-space: pre-wrap;
+    display: none; max-height: 380px; overflow-y: auto;
+    border-top: 1px solid var(--steel);
+  }
+  .output-body.visible { display: block; }
+
+  .feedback-line {
+    font-size: 0.72rem; font-style: italic; color: var(--smoke);
+    padding: 0.55rem 1rem; border-top: 1px solid var(--steel);
+    background: rgba(0,0,0,0.12);
+  }
+
+  .summary-card {
+    background: rgba(255,69,0,0.05); border: 1px solid rgba(255,69,0,0.25);
+    border-radius: 4px; padding: 1.4rem; margin-top: 2rem;
+    animation: fadeUp 0.5s ease both;
+  }
+  .summary-label { font-family: 'Bebas Neue', sans-serif; font-size: 1.05rem; letter-spacing: 0.1em; color: var(--ember); margin-bottom: 0.65rem; }
+  .summary-text { font-family: 'Instrument Serif', serif; font-size: 1.02rem; line-height: 1.7; color: var(--cream); }
+
+  .stats-bar { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .stat { display: flex; flex-direction: column; gap: 0.12rem; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; color: var(--forge); line-height: 1; }
+  .stat-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--smoke); }
+
+  .error-box {
+    background: rgba(229,57,53,0.09); border: 1px solid rgba(229,57,53,0.35);
+    border-radius: 3px; padding: 0.9rem; color: #ef9a9a; font-size: 0.8rem; margin-top: 1rem;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--ash); }
+  ::-webkit-scrollbar-thumb { background: var(--steel); border-radius: 3px; }
+
+  @media (max-width: 640px) {
+    .agent-grid { grid-template-columns: 1fr; }
+    .field-row { flex-direction: column; }
+    .tasks-grid { grid-template-columns: 1fr; }
+    nav { padding: 0 1rem; }
+    .save-bar { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">⚒ IdeaSmith</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('forge')">Forge</button>
+    <button class="nav-tab" onclick="showPage('settings')">⚙ Settings</button>
+  </div>
+</nav>
+
+<!-- ══ FORGE PAGE ══ -->
+<div id="page-forge" class="page active">
+  <div class="wrapper">
+    <header>
+      <div class="hammer-wrap">
+        <svg class="hammer-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <path d="M56 8L48 4l-8 8-8-4-4 8 8 4-20 28 4 8 8-4 20-28 4 8 8-4-4-16z"/>
+          <rect x="8" y="50" width="20" height="6" rx="2" transform="rotate(-45 18 53)"/>
+        </svg>
+      </div>
+      <h1>IdeaSmith</h1>
+      <p class="tagline">Forge your ideas into reality — no coding required.</p>
+    </header>
+
+    <div class="divider"><span class="divider-icon">⚒</span></div>
+
+    <div class="config-preview" id="config-preview"></div>
+
+    <div class="card">
+      <label>Your Project Idea</label>
+      <textarea id="idea-input" placeholder="Describe your project in plain language…&#10;&#10;Example: Build a recipe recommendation app that suggests meals based on what's in my fridge, with a calorie tracker and shopping list generator."></textarea>
+      <div class="field-row">
+        <button class="btn-forge" id="forge-btn" onclick="startForge()">⚒ FORGE IT</button>
+      </div>
+    </div>
+
+    <div id="pipeline">
+      <div class="divider" style="margin-top:2rem"><span class="divider-icon">⚙</span></div>
+      <div id="phase-banner" class="phase-banner" style="display:none">
+        <div class="spinner"></div>
+        <span id="phase-text">Starting...</span>
+      </div>
+      <div id="tasks-section" style="display:none">
+        <div class="stats-bar" id="stats-bar"></div>
+        <div class="tasks-grid" id="tasks-grid"></div>
+      </div>
+      <div id="outputs-section" style="display:none">
+        <div id="outputs-list"></div>
+      </div>
+      <div id="summary-card" class="summary-card" style="display:none">
+        <div class="summary-label">⚒ Project Complete</div>
+        <div id="summary-text" class="summary-text"></div>
+      </div>
+      <div id="error-box" class="error-box" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS PAGE ══ -->
+<div id="page-settings" class="page">
+  <div class="settings-wrapper">
+    <div class="settings-title">⚙ Agent Settings</div>
+    <div class="settings-sub">Configure AI provider, model, and API key for each agent independently.</div>
+
+    <div class="agent-grid">
+
+      <!-- Manager AI -->
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-icon manager">🧠</div>
+          <div>
+            <div class="agent-name manager">Manager AI</div>
+            <div class="agent-role">Plans tasks · Reviews outputs · Summarizes</div>
+          </div>
+        </div>
+        <div class="agent-body">
+          <label>Provider</label>
+          <div class="provider-pills" id="mgr-pills"></div>
+
+          <div class="field-group">
+            <label>Model</label>
+            <select id="mgr-model" onchange="saveSettings()"></select>
+          </div>
+
+          <div class="custom-model-row">
+            <input type="text" id="mgr-custom-model" placeholder="Custom model name…"/>
+            <button class="btn-secondary" onclick="applyCustomModel('mgr')">Use</button>
+          </div>
+
+          <div class="field-group">
+            <label>API Key</label>
+            <div class="key-wrap">
+              <input type="password" id="mgr-key" placeholder="Paste your API key…" oninput="saveSettings()"/>
+              <button class="eye-btn" onclick="toggleKey('mgr-key', this)">👁</button>
+            </div>
+            <div class="provider-docs" id="mgr-docs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Developer AI -->
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-icon developer">💻</div>
+          <div>
+            <div class="agent-name developer">Developer AI</div>
+            <div class="agent-role">Executes tasks · Produces deliverables</div>
+          </div>
+        </div>
+        <div class="agent-body">
+          <label>Provider</label>
+          <div class="provider-pills" id="dev-pills"></div>
+
+          <div class="field-group">
+            <label>Model</label>
+            <select id="dev-model" onchange="saveSettings()"></select>
+          </div>
+
+          <div class="custom-model-row">
+            <input type="text" id="dev-custom-model" placeholder="Custom model name…"/>
+            <button class="btn-secondary" onclick="applyCustomModel('dev')">Use</button>
+          </div>
+
+          <div class="field-group">
+            <label>API Key</label>
+            <div class="key-wrap">
+              <input type="password" id="dev-key" placeholder="Paste your API key…" oninput="saveSettings()"/>
+              <button class="eye-btn" onclick="toggleKey('dev-key', this)">👁</button>
+            </div>
+            <div class="provider-docs" id="dev-docs"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <div class="save-info">
+        <strong>Tip:</strong> Mix and match — e.g. GPT-4o as Manager and Claude Sonnet as Developer.
+        Settings are saved automatically to your browser.
+      </div>
+      <button class="btn-secondary" onclick="syncKeys()">Copy Manager key → Developer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let PROVIDERS = {};
+
+const settings = {
+  manager:   { provider: 'anthropic', model: '', key: '' },
+  developer: { provider: 'anthropic', model: '', key: '' },
+};
+
+const ps = { tasks: [], outputs: {}, reviews: {} };
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+
+async function boot() {
+  try {
+    const res = await fetch('/providers');
+    PROVIDERS = await res.json();
+  } catch(e) {
+    PROVIDERS = {
+      anthropic: { label:'Anthropic', models:['claude-sonnet-4-5-20251101','claude-haiku-4-5-20251001'], key_hint:'sk-ant-...', docs:'https://docs.anthropic.com' },
+      openai:    { label:'OpenAI',    models:['gpt-4o','gpt-4o-mini'],                                   key_hint:'sk-...',      docs:'https://platform.openai.com/docs' },
+    };
+  }
+
+  try {
+    const saved = JSON.parse(localStorage.getItem('ideasmith_v2') || '{}');
+    if (saved.manager)   Object.assign(settings.manager,   saved.manager);
+    if (saved.developer) Object.assign(settings.developer, saved.developer);
+  } catch(e) {}
+
+  buildAgent('mgr', 'manager');
+  buildAgent('dev', 'developer');
+  updateConfigPreview();
+}
+
+// ── Settings helpers ──────────────────────────────────────────────────────
+
+function buildAgent(prefix, agentKey) {
+  buildProviderPills(prefix, agentKey);
+  populateModels(prefix, agentKey);
+  updateDocs(prefix, agentKey);
+  document.getElementById(`${prefix}-key`).value = settings[agentKey].key || '';
+}
+
+function buildProviderPills(prefix, agentKey) {
+  const container = document.getElementById(`${prefix}-pills`);
+  container.innerHTML = '';
+  Object.entries(PROVIDERS).forEach(([key, prov]) => {
+    const btn = document.createElement('button');
+    btn.className = 'provider-pill' + (settings[agentKey].provider === key ? ' active' : '');
+    btn.textContent = prov.label;
+    btn.onclick = () => selectProvider(prefix, agentKey, key);
+    container.appendChild(btn);
+  });
+}
+
+function selectProvider(prefix, agentKey, providerKey) {
+  settings[agentKey].provider = providerKey;
+  settings[agentKey].model = '';
+  document.querySelectorAll(`#${prefix}-pills .provider-pill`).forEach(p => {
+    p.classList.toggle('active', p.textContent === PROVIDERS[providerKey].label);
+  });
+  populateModels(prefix, agentKey);
+  updateDocs(prefix, agentKey);
+  saveSettings();
+}
+
+function populateModels(prefix, agentKey) {
+  const sel = document.getElementById(`${prefix}-model`);
+  const prov = PROVIDERS[settings[agentKey].provider];
+  if (!prov) return;
+  sel.innerHTML = prov.models.map(m =>
+    `<option value="${m}"${settings[agentKey].model === m ? ' selected' : ''}>${m}</option>`
+  ).join('');
+  if (!settings[agentKey].model) {
+    settings[agentKey].model = prov.models[0];
+    sel.value = prov.models[0];
+  }
+}
+
+function updateDocs(prefix, agentKey) {
+  const prov = PROVIDERS[settings[agentKey].provider];
+  const el = document.getElementById(`${prefix}-docs`);
+  if (!prov) { el.innerHTML = ''; return; }
+  el.innerHTML = `Key format: <code>${prov.key_hint}</code> &nbsp;·&nbsp; <a href="${prov.docs}" target="_blank" rel="noopener">Docs ↗</a>`;
+}
+
+function applyCustomModel(prefix) {
+  const agentKey = prefix === 'mgr' ? 'manager' : 'developer';
+  const val = document.getElementById(`${prefix}-custom-model`).value.trim();
+  if (!val) return;
+  const sel = document.getElementById(`${prefix}-model`);
+  if (![...sel.options].some(o => o.value === val)) {
+    const opt = new Option(val, val);
+    sel.appendChild(opt);
+  }
+  sel.value = val;
+  settings[agentKey].model = val;
+  document.getElementById(`${prefix}-custom-model`).value = '';
+  saveSettings();
+}
+
+function toggleKey(inputId, btn) {
+  const el = document.getElementById(inputId);
+  if (el.type === 'password') { el.type = 'text'; btn.textContent = '🙈'; }
+  else { el.type = 'password'; btn.textContent = '👁'; }
+}
+
+function syncKeys() {
+  const key = document.getElementById('mgr-key').value;
+  document.getElementById('dev-key').value = key;
+  settings.developer.key = key;
+  saveSettings();
+}
+
+function saveSettings() {
+  settings.manager.key     = document.getElementById('mgr-key').value;
+  settings.developer.key   = document.getElementById('dev-key').value;
+  settings.manager.model   = document.getElementById('mgr-model').value;
+  settings.developer.model = document.getElementById('dev-model').value;
+  try { localStorage.setItem('ideasmith_v2', JSON.stringify(settings)); } catch(e) {}
+  updateConfigPreview();
+}
+
+// ── Config chips ──────────────────────────────────────────────────────────
+
+function updateConfigPreview() {
+  const preview = document.getElementById('config-preview');
+  const mgrLabel = (PROVIDERS[settings.manager.provider]  || {}).label || settings.manager.provider;
+  const devLabel = (PROVIDERS[settings.developer.provider] || {}).label || settings.developer.provider;
+  preview.innerHTML = `
+    <div class="config-chip" onclick="showPage('settings')" title="Edit settings">
+      <div class="chip-dot manager"></div>
+      <span>Manager:</span>
+      <span class="chip-label">${mgrLabel}</span>
+      <span style="color:var(--smoke)">/ ${settings.manager.model || '—'}</span>
+    </div>
+    <div class="config-chip" onclick="showPage('settings')" title="Edit settings">
+      <div class="chip-dot developer"></div>
+      <span>Developer:</span>
+      <span class="chip-label">${devLabel}</span>
+      <span style="color:var(--smoke)">/ ${settings.developer.model || '—'}</span>
+    </div>`;
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if (t.textContent.toLowerCase().includes(name)) t.classList.add('active');
+  });
+  if (name === 'forge') updateConfigPreview();
+}
+
+// ── Pipeline helpers ──────────────────────────────────────────────────────
+
+const badgeClass = t => `badge-${['research','design','code','content','review'].includes(t) ? t : 'other'}`;
+const scoreClass = s => s >= 8 ? 'score-high' : s >= 5 ? 'score-mid' : 'score-low';
+
+function toggleCard(id) {
+  document.getElementById(`body-${id}`).classList.toggle('visible');
+  document.getElementById(`chevron-${id}`).classList.toggle('open');
+}
+
+function updateStats() {
+  const total    = ps.tasks.length;
+  const approved = Object.values(ps.reviews).filter(r => r.approved).length;
+  const scores   = Object.values(ps.reviews).map(r => r.score);
+  const avg      = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : '—';
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat"><div class="stat-value">${total}</div><div class="stat-label">Tasks</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--green)">${approved}</div><div class="stat-label">Approved</div></div>
+    <div class="stat"><div class="stat-value">${avg}</div><div class="stat-label">Avg Score</div></div>`;
+}
+
+// ── Forge ─────────────────────────────────────────────────────────────────
+
+async function startForge() {
+  const idea = document.getElementById('idea-input').value.trim();
+  if (!idea) { alert('Please describe your project idea first!'); return; }
+
+  if (!settings.manager.key.trim()) {
+    alert('No Manager AI key set.\nGo to ⚙ Settings and paste your API key.');
+    showPage('settings'); return;
+  }
+  if (!settings.developer.key.trim()) {
+    alert('No Developer AI key set.\nGo to ⚙ Settings and paste your API key.');
+    showPage('settings'); return;
+  }
+
+  Object.assign(ps, { tasks: [], outputs: {}, reviews: {} });
+  ['tasks-grid','outputs-list','stats-bar'].forEach(id => document.getElementById(id).innerHTML = '');
+  ['summary-card','error-box','outputs-section','tasks-section'].forEach(id =>
+    document.getElementById(id).style.display = 'none');
+
+  document.getElementById('pipeline').style.display = 'block';
+  document.getElementById('phase-banner').style.display = 'flex';
+
+  const btn = document.getElementById('forge-btn');
+  btn.disabled = true; btn.textContent = '⚙ FORGING...';
+
+  const response = await fetch('/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      idea,
+      manager_provider:   settings.manager.provider,
+      manager_key:        settings.manager.key.trim(),
+      manager_model:      settings.manager.model,
+      developer_provider: settings.developer.provider,
+      developer_key:      settings.developer.key.trim(),
+      developer_model:    settings.developer.model,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
+    showError(err.error || 'Unknown error');
+    btn.disabled = false; btn.textContent = '⚒ FORGE IT';
+    return;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+    let event = null;
+    for (const line of lines) {
+      if (line.startsWith('event: ')) event = line.slice(7).trim();
+      else if (line.startsWith('data: ') && event) {
+        try { handleEvent(event, JSON.parse(line.slice(6))); } catch(e) {}
+        event = null;
+      }
+    }
+  }
+
+  btn.disabled = false; btn.textContent = '⚒ FORGE IT';
+  document.getElementById('phase-banner').style.display = 'none';
+}
+
+function handleEvent(event, data) {
+  switch (event) {
+    case 'phase':
+      document.getElementById('phase-text').textContent = data.message;
+      break;
+
+    case 'tasks':
+      ps.tasks = data.tasks;
+      document.getElementById('tasks-grid').innerHTML = data.tasks.map(t => `
+        <div class="task-chip" id="chip-${t.id}">
+          <span class="task-type-badge ${badgeClass(t.type)}">${t.type}</span>
+          <div class="task-title">${t.title}</div>
+          <div class="task-status" id="chip-status-${t.id}">Queued</div>
+        </div>`).join('');
+      document.getElementById('tasks-section').style.display = 'block';
+      updateStats();
+      break;
+
+    case 'task_start': {
+      const chip = document.getElementById(`chip-${data.task_id}`);
+      if (chip) chip.classList.add('running');
+      const st = document.getElementById(`chip-status-${data.task_id}`);
+      if (st) { st.textContent = 'Executing…'; st.className = 'task-status'; }
+      break;
+    }
+
+    case 'task_done':
+      ps.outputs[data.task_id] = data.output;
+      break;
+
+    case 'review': {
+      ps.reviews[data.task_id] = data;
+      const task = ps.tasks.find(t => t.id === data.task_id);
+      if (!task) break;
+
+      const chip = document.getElementById(`chip-${data.task_id}`);
+      if (chip) { chip.classList.remove('running'); chip.classList.add(data.approved ? 'approved' : 'rejected'); }
+      const st = document.getElementById(`chip-status-${data.task_id}`);
+      if (st) { st.textContent = data.approved ? `✓ Approved · ${data.score}/10` : `✗ Rejected · ${data.score}/10`; st.className = `task-status ${data.approved ? 'ok' : 'bad'}`; }
+
+      const output = ps.outputs[task.id] || '';
+      const sc = scoreClass(data.score);
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="output-card">
+          <div class="output-header" onclick="toggleCard(${task.id})">
+            <div class="output-header-left">
+              <span class="task-type-badge ${badgeClass(task.type)}">${task.type}</span>
+              <span class="output-title">${task.title}</span>
+            </div>
+            <span class="score-badge ${sc}">${data.score}/10 ${data.approved ? '✓' : '✗'}</span>
+            <span class="chevron" id="chevron-${task.id}">▾</span>
+          </div>
+          <div class="output-body" id="body-${task.id}">${output}</div>
+          ${data.feedback ? `<div class="feedback-line">${data.feedback}</div>` : ''}
+        </div>`;
+      document.getElementById('outputs-list').appendChild(div.firstElementChild);
+      document.getElementById('outputs-section').style.display = 'block';
+      updateStats();
+      break;
+    }
+
+    case 'summary':
+      document.getElementById('summary-text').textContent = data.text;
+      document.getElementById('summary-card').style.display = 'block';
+      break;
+
+    case 'error':
+      showError(data.message);
+      break;
+  }
+}
+
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  box.textContent = '⚠ ' + msg;
+  box.style.display = 'block';
+}
+
+boot();
+</script>
+</body>
+</html>

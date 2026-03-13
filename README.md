@@ -1,53 +1,75 @@
-# IdeaSmith
+# ⚒ IdeaSmith
 
-**IdeaSmith** is a minimal open-source **dual-AI** project scaffold where a **Manager AI** supervises a **Developer AI** to turn plain-language project ideas into concrete outputs.
+**Forge your ideas into reality — no coding required.**
 
-This repository is an MVP (minimum viable prototype) designed to be easy to understand and extend.
+IdeaSmith is an open-source dual-AI system powered by Claude. Users share their vision in plain language and two AI agents handle the rest:
 
-## MVP workflow
+- **Manager AI** (Claude Opus) — Understands your idea, breaks it into tasks, and reviews every output.
+- **Developer AI** (Claude Sonnet) — Executes each task and produces real, detailed deliverables.
 
-1. **User provides an idea** (plain text) via CLI.
-2. **ManagerAI** parses the idea into a list of tasks.
-3. **DeveloperAI** executes each task (MVP: returns a simple completion string).
-4. **ManagerAI** reviews each output (MVP: approves).
-5. The CLI prints a final, task-by-task report.
+## Features
+- 🔨 Real AI-powered task parsing (not rule-based)
+- ⚙️ Per-task type execution (research, design, code, content, review)
+- ✅ Automated quality review with scoring
+- 🌐 Beautiful web UI with live streaming progress
+- 🔑 Bring your own Anthropic API key
 
-## Project structure
-
-```
-IdeaSmith/
-├── README.md
-├── CONTRIBUTING.md
-├── requirements.txt
-├── manager_ai/
-│   ├── manager.py
-│   └── task_parser.py
-├── developer_ai/
-│   ├── developer.py
-│   └── executor.py
-├── interface/
-│   └── main.py
-└── examples/
-    └── example_idea.json
-```
-
-## Quick start (MVP)
-
-### 1) Install dependencies
+## Quick Start
 
 ```bash
-python -m pip install -r requirements.txt
-```
+git clone https://github.com/YOUR_USERNAME/IdeaSmith.git
+cd IdeaSmith
+pip install -r requirements.txt
 
-### 2) Run the CLI
+# Add your API key
+cp .env.example .env
+# Edit .env and set ANTHROPIC_API_KEY=sk-ant-...
 
-```bash
 python interface/main.py
 ```
 
-Then paste a project idea and press Enter. Use an empty line to finish multi-line input.
+Open http://localhost:5000 in your browser.
+
+## How It Works
+
+1. You type a project idea in plain language
+2. **Manager AI** breaks it into 3–8 structured tasks
+3. **Developer AI** executes each task in sequence
+4. **Manager AI** reviews and scores each output (1–10)
+5. A final summary is generated with next steps
+
+## Project Structure
+
+```
+IdeaSmith/
+├── manager_ai/
+│   ├── manager.py        # ManagerAI class (parse, review, summarize)
+│   └── task_parser.py    # Claude-powered task decomposition
+├── developer_ai/
+│   ├── developer.py      # DeveloperAI class
+│   └── executor.py       # Claude-powered task execution
+├── interface/
+│   ├── main.py           # Flask web server + SSE streaming
+│   └── templates/
+│       └── index.html    # Web UI
+├── config.py             # Model & key configuration
+├── requirements.txt
+└── .env.example
+```
+
+## Configuration
+
+Edit `config.py` to change models:
+
+```python
+MANAGER_MODEL  = "claude-opus-4-5-20251101"    # Smarter, for planning
+DEVELOPER_MODEL = "claude-sonnet-4-5-20251101" # Faster, for execution
+```
 
 ## Contributing
 
-See `CONTRIBUTING.md` for how to contribute and ideas for improvements.
+Contributions welcome! See CONTRIBUTING.md.
 
+## License
+
+MIT

@@ -1,61 +1,39 @@
-"""
-Task parsing utilities for IdeaSmith.
-
-MVP behavior:
-- Convert a plain-language idea into a list of actionable task strings.
-- Keep it deterministic and easy to extend later with real LLM-backed parsing.
-"""
-
-from __future__ import annotations
-
-from typing import List
+import json
+from ai_client import AIClient
 
 
-def parse_tasks(idea_text: str) -> List[str]:
+def parse_tasks(idea_text: str, client: AIClient) -> list[dict]:
     """
-    Convert an idea (plain text) into a list of task strings.
-
-    Strategy (MVP):
-    - If the user provided multiple lines, treat each non-empty line as a task.
-    - Otherwise, split on common sentence delimiters and create tasks from clauses.
-
-    Args:
-        idea_text: Free-form user idea text.
-
-    Returns:
-        A list of tasks (strings). Never returns an empty list; falls back to one task.
+    Uses the configured AI to break an idea into structured tasks.
+    Returns a list of task dicts: id, title, description, type.
     """
-    text = (idea_text or "").strip()
-    if not text:
-        return ["Clarify project idea (no input provided)."]
+    prompt = f"""You are a senior project manager. A user has submitted the following project idea:
 
-    # Prefer line-based tasks if the user enters multiple lines / bullets.
-    lines = [ln.strip(" \t-•") for ln in text.splitlines()]
-    tasks = [ln for ln in lines if ln]
-    if len(tasks) >= 2:
-        return tasks
+\"\"\"{idea_text}\"\"\"
 
-    # Sentence-ish splitting for single-paragraph ideas.
-    # Keep it simple for MVP (no heavy NLP).
-    for delim in [".", ";", " and ", " then "]:
-        if delim.strip() in text:
-            parts = [p.strip(" \t-•.,;") for p in text.replace("\n", " ").split(delim)]
-            tasks = [p for p in parts if p]
-            break
+Break this idea into a clear, actionable list of tasks. For each task, determine:
+- A short title
+- A detailed description of what needs to be done
+- A type: one of "research", "design", "code", "content", "review", or "other"
 
-    if not tasks:
-        tasks = [text]
+Respond ONLY with a valid JSON array. No markdown, no explanation. Example format:
+[
+  {{
+    "id": 1,
+    "title": "Define project scope",
+    "description": "Outline the core features and boundaries of the project.",
+    "type": "research"
+  }}
+]
 
-    # Make tasks feel like tasks (optional light normalization).
-    normalized: List[str] = []
-    for t in tasks:
-        t = t.strip()
-        if not t:
-            continue
-        # If it doesn't look imperative, prefix with "Do:" for clarity.
-        if not t.lower().startswith(("build", "create", "implement", "design", "add", "write", "set up", "setup")):
-            t = f"Do: {t}"
-        normalized.append(t)
+Generate between 3 and 8 tasks. Be specific and practical."""
 
-    return normalized or [text]
+    raw = client.complete(prompt)
 
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    raw = raw.strip()
+
+    return json.loads(raw)

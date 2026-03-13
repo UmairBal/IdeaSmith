@@ -1,6 +1,10 @@
-# Core HTTP + (future) AI + (future) APIs
-openai
-flask
-fastapi
-requests
+anthropic>=0.40.0
+flask>=3.0.0
+python-dotenv>=1.0.0
 
+# Optional — install only the providers you need:
+openai>=1.30.0
+google-generativeai>=0.7.0
+mistralai>=1.0.0
+groq>=0.9.0
+cohere>=5.0.0
