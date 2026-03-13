@@ -1,17 +1,33 @@
 """
 ai_client.py — Provider-agnostic AI completion client.
-Supports: Anthropic, OpenAI, Google Gemini, Mistral, Groq, Cohere.
-All providers normalised to a single call: complete(messages, system) -> str
+Supports: Groq (free), Anthropic, OpenAI, Google Gemini, Mistral, Cohere.
 """
 
 from __future__ import annotations
-import json
-
-# ── Provider registry ────────────────────────────────────────────────────────
 
 PROVIDERS = {
+    "groq": {
+        "label": "Groq",
+        "free": True,
+        "free_note": "Free tier — no credit card needed",
+        "get_key_url": "https://console.groq.com/keys",
+        "models": [
+            "llama-3.3-70b-versatile",
+            "llama-3.1-70b-versatile",
+            "llama-3.1-8b-instant",
+            "llama3-70b-8192",
+            "llama3-8b-8192",
+            "mixtral-8x7b-32768",
+            "gemma2-9b-it",
+            "gemma-7b-it",
+        ],
+        "key_hint": "gsk_...",
+        "docs": "https://console.groq.com/docs",
+    },
     "anthropic": {
         "label": "Anthropic",
+        "free": False,
+        "get_key_url": "https://console.anthropic.com/keys",
         "models": [
             "claude-opus-4-5-20251101",
             "claude-sonnet-4-5-20251101",
@@ -24,6 +40,8 @@ PROVIDERS = {
     },
     "openai": {
         "label": "OpenAI",
+        "free": False,
+        "get_key_url": "https://platform.openai.com/api-keys",
         "models": [
             "gpt-4o",
             "gpt-4o-mini",
@@ -39,6 +57,9 @@ PROVIDERS = {
     },
     "gemini": {
         "label": "Google Gemini",
+        "free": True,
+        "free_note": "Free tier via Google AI Studio",
+        "get_key_url": "https://aistudio.google.com/app/apikey",
         "models": [
             "gemini-2.0-flash",
             "gemini-1.5-pro",
@@ -50,6 +71,8 @@ PROVIDERS = {
     },
     "mistral": {
         "label": "Mistral AI",
+        "free": False,
+        "get_key_url": "https://console.mistral.ai/api-keys/",
         "models": [
             "mistral-large-latest",
             "mistral-medium-latest",
@@ -59,19 +82,10 @@ PROVIDERS = {
         "key_hint": "...",
         "docs": "https://docs.mistral.ai",
     },
-    "groq": {
-        "label": "Groq",
-        "models": [
-            "llama-3.3-70b-versatile",
-            "llama-3.1-8b-instant",
-            "mixtral-8x7b-32768",
-            "gemma2-9b-it",
-        ],
-        "key_hint": "gsk_...",
-        "docs": "https://console.groq.com/docs",
-    },
     "cohere": {
         "label": "Cohere",
+        "free": False,
+        "get_key_url": "https://dashboard.cohere.com/api-keys",
         "models": [
             "command-r-plus",
             "command-r",
@@ -85,24 +99,36 @@ PROVIDERS = {
 
 
 class AIClient:
-    """Unified completion client."""
+    """Unified completion client — normalises all providers to one interface."""
 
     def __init__(self, provider: str, api_key: str, model: str):
         self.provider = provider.lower()
-        self.api_key = api_key
-        self.model = model
-
+        self.api_key  = api_key
+        self.model    = model
         if self.provider not in PROVIDERS:
             raise ValueError(f"Unknown provider: {provider}. Choose from: {list(PROVIDERS.keys())}")
 
-    # ── Public API ────────────────────────────────────────────────────────────
-
     def complete(self, user_prompt: str, system_prompt: str = "") -> str:
-        """Run a completion and return the text response."""
         method = getattr(self, f"_complete_{self.provider}", None)
         if method is None:
-            raise NotImplementedError(f"Provider {self.provider} not yet implemented.")
+            raise NotImplementedError(f"Provider '{self.provider}' not yet implemented.")
         return method(user_prompt, system_prompt)
+
+    # ── Groq ──────────────────────────────────────────────────────────────────
+
+    def _complete_groq(self, user_prompt: str, system_prompt: str) -> str:
+        from groq import Groq
+        client = Groq(api_key=self.api_key)
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_prompt})
+        response = client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            max_tokens=2000,
+        )
+        return response.choices[0].message.content.strip()
 
     # ── Anthropic ─────────────────────────────────────────────────────────────
 
@@ -157,27 +183,14 @@ class AIClient:
         response = client.chat.complete(model=self.model, messages=messages)
         return response.choices[0].message.content.strip()
 
-    # ── Groq ──────────────────────────────────────────────────────────────────
-
-    def _complete_groq(self, user_prompt: str, system_prompt: str) -> str:
-        from groq import Groq
-        client = Groq(api_key=self.api_key)
-        messages = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": user_prompt})
-        response = client.chat.completions.create(model=self.model, messages=messages, max_tokens=2000)
-        return response.choices[0].message.content.strip()
-
     # ── Cohere ────────────────────────────────────────────────────────────────
 
     def _complete_cohere(self, user_prompt: str, system_prompt: str) -> str:
         import cohere
         client = cohere.Client(api_key=self.api_key)
-        preamble = system_prompt or None
         response = client.chat(
             model=self.model,
             message=user_prompt,
-            preamble=preamble,
+            preamble=system_prompt or None,
         )
         return response.text.strip()

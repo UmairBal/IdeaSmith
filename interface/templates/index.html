@@ -226,10 +226,36 @@
     color: var(--smoke); font-size: 0.66rem; letter-spacing: 0.1em;
     padding: 0.28rem 0.7rem; cursor: pointer;
     transition: all 0.15s; font-family: 'DM Mono', monospace;
+    display: inline-flex; align-items: center; gap: 0.35rem;
   }
 
   .provider-pill:hover { border-color: var(--smoke); color: var(--parch); }
   .provider-pill.active { border-color: var(--forge); color: var(--forge); background: rgba(255,69,0,0.08); }
+  .provider-pill.active .free-tag { background: rgba(255,69,0,0.2); color: var(--forge); }
+
+  .free-tag {
+    background: rgba(50,205,50,0.15); color: #4CAF50;
+    font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.1rem 0.35rem; border-radius: 10px; font-weight: 600;
+  }
+
+  .get-key-btn {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: rgba(50,205,50,0.1); border: 1px solid rgba(50,205,50,0.3);
+    color: #4CAF50; border-radius: 3px;
+    font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.06em;
+    padding: 0.4rem 0.8rem; cursor: pointer; text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .get-key-btn:hover { background: rgba(50,205,50,0.18); border-color: rgba(50,205,50,0.5); }
+
+  .free-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    background: rgba(50,205,50,0.07); border: 1px solid rgba(50,205,50,0.2);
+    border-radius: 3px; padding: 0.55rem 0.8rem; margin-top: 0.7rem;
+    flex-wrap: wrap;
+  }
+  .free-banner-text { font-size: 0.69rem; color: #81C784; }
 
   .key-wrap { position: relative; }
   .key-wrap input { padding-right: 2.8rem; }
@@ -588,7 +614,8 @@ function buildProviderPills(prefix, agentKey) {
   Object.entries(PROVIDERS).forEach(([key, prov]) => {
     const btn = document.createElement('button');
     btn.className = 'provider-pill' + (settings[agentKey].provider === key ? ' active' : '');
-    btn.textContent = prov.label;
+    btn.dataset.providerKey = key;
+    btn.innerHTML = prov.label + (prov.free ? ' <span class="free-tag">FREE</span>' : '');
     btn.onclick = () => selectProvider(prefix, agentKey, key);
     container.appendChild(btn);
   });
@@ -598,7 +625,7 @@ function selectProvider(prefix, agentKey, providerKey) {
   settings[agentKey].provider = providerKey;
   settings[agentKey].model = '';
   document.querySelectorAll(`#${prefix}-pills .provider-pill`).forEach(p => {
-    p.classList.toggle('active', p.textContent === PROVIDERS[providerKey].label);
+    p.classList.toggle('active', p.dataset.providerKey === providerKey);
   });
   populateModels(prefix, agentKey);
   updateDocs(prefix, agentKey);
@@ -622,7 +649,18 @@ function updateDocs(prefix, agentKey) {
   const prov = PROVIDERS[settings[agentKey].provider];
   const el = document.getElementById(`${prefix}-docs`);
   if (!prov) { el.innerHTML = ''; return; }
-  el.innerHTML = `Key format: <code>${prov.key_hint}</code> &nbsp;·&nbsp; <a href="${prov.docs}" target="_blank" rel="noopener">Docs ↗</a>`;
+  const freeBanner = prov.free ? `
+    <div class="free-banner">
+      <span class="free-banner-text">✦ ${prov.free_note || 'Free tier available'}</span>
+      <a class="get-key-btn" href="${prov.get_key_url || prov.docs}" target="_blank" rel="noopener">
+        Get free API key ↗
+      </a>
+    </div>` : '';
+  el.innerHTML = `<span>Key format: <code>${prov.key_hint}</code></span>
+    <a href="${prov.docs}" target="_blank" rel="noopener">Docs ↗</a>
+    ${freeBanner}`;
+  el.style.flexDirection = prov.free ? 'column' : 'row';
+  el.style.alignItems = prov.free ? 'flex-start' : 'center';
 }
 
 function applyCustomModel(prefix) {
