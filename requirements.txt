@@ -1,0 +1,6 @@
+# Core HTTP + (future) AI + (future) APIs
+openai
+flask
+fastapi
+requests
+

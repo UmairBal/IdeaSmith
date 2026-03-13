@@ -1,0 +1,5 @@
+{
+  "title": "Tiny Personal Finance Tracker",
+  "idea": "Build a small CLI app that lets users log income/expenses, stores data in a local JSON file, and prints a monthly summary. Include commands: add, list, summary."
+}
+
