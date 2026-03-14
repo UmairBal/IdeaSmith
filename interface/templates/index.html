@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IdeaSmith — Forge Ideas into Reality</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    /* ── CSS Variables ─────────────────────────────────────────── */
+    :root {
+      --bg0: #0d1117;
+      --bg1: #161b22;
+      --bg2: #21262d;
+      --bg3: #2d333b;
+      --border: #30363d;
+      --border-subtle: #21262d;
+      --text0: #e6edf3;
+      --text1: #adbac7;
+      --text2: #768390;
+      --text3: #545d68;
+      --accent: #7c3aed;
+      --accent-light: #a855f7;
+      --accent-bg: rgba(124,58,237,0.12);
+      --accent-border: rgba(124,58,237,0.4);
+      --green: #3fb950;
+      --green-bg: rgba(63,185,80,0.1);
+      --yellow: #d29922;
+      --yellow-bg: rgba(210,153,34,0.1);
+      --red: #f85149;
+      --red-bg: rgba(248,81,73,0.1);
+      --blue: #58a6ff;
+      --blue-bg: rgba(88,166,255,0.1);
+      --orange: #ff7b72;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow: 0 4px 16px rgba(0,0,0,0.4);
+      --transition: 0.18s ease;
+      --font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    }
+    [data-theme="light"] {
+      --bg0: #f6f8fa;
+      --bg1: #ffffff;
+      --bg2: #f0f3f6;
+      --bg3: #e8ecf0;
+      --border: #d0d7de;
+      --border-subtle: #e8ecf0;
+      --text0: #1f2328;
+      --text1: #4b5563;
+      --text2: #6b7280;
+      --text3: #9ca3af;
+      --accent: #6d28d9;
+      --accent-light: #7c3aed;
+      --accent-bg: rgba(109,40,217,0.08);
+      --accent-border: rgba(109,40,217,0.3);
+      --green: #1a7f37;
+      --green-bg: rgba(26,127,55,0.08);
+      --yellow: #9a6700;
+      --yellow-bg: rgba(154,103,0,0.08);
+      --red: #cf222e;
+      --red-bg: rgba(207,34,46,0.08);
+      --blue: #0969da;
+      --blue-bg: rgba(9,105,218,0.08);
+      --shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    /* ── Reset & Base ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      background: var(--bg0);
+      color: var(--text0);
+      display: flex;
+      flex-direction: column;
+      transition: background var(--transition), color var(--transition);
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    #header {
+      height: 52px;
+      min-height: 52px;
+      background: var(--bg1);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      z-index: 100;
+      user-select: none;
+    }
+    #logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.3px;
+      color: var(--text0);
+    }
+    #logo span.hammer { font-size: 18px; }
+    #logo span.smith { color: var(--accent-light); }
+    #header-spacer { flex: 1; }
+    #phase-badge {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: var(--accent-bg);
+      border: 1px solid var(--accent-border);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--accent-light);
+      font-weight: 500;
+    }
+    #phase-badge .pulse {
+      width: 7px; height: 7px;
+      background: var(--accent-light);
+      border-radius: 50%;
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+    .header-btn {
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text1);
+      cursor: pointer;
+      font-size: 15px;
+      transition: all var(--transition);
+    }
+    .header-btn:hover { background: var(--bg2); color: var(--text0); border-color: var(--text3); }
+    #session-info {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: var(--font-mono);
+      display: none;
+    }
+
+    /* ── Main Layout ───────────────────────────────────────────── */
+    #main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 240px 1fr 380px;
+      overflow: hidden;
+    }
+    .panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--bg0);
+    }
+    .panel:last-child { border-right: none; }
+    .panel-header {
+      height: 38px;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      background: var(--bg1);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text2);
+    }
+    .panel-header-actions { display: flex; gap: 4px; }
+    .icon-btn {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none;
+      border-radius: 4px;
+      color: var(--text2);
+      cursor: pointer;
+      font-size: 12px;
+      transition: all var(--transition);
+    }
+    .icon-btn:hover { background: var(--bg2); color: var(--text0); }
+
+    /* ── File Tree Panel ───────────────────────────────────────── */
+    #file-panel { background: var(--bg1); }
+    #file-tree-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 0;
+    }
+    .tree-empty {
+      padding: 32px 16px;
+      text-align: center;
+      color: var(--text3);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .tree-empty .empty-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+    .tree-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin: 1px 4px;
+      color: var(--text1);
+      font-size: 13px;
+      transition: background var(--transition);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tree-item:hover { background: var(--bg2); color: var(--text0); }
+    .tree-item.active { background: var(--accent-bg); color: var(--accent-light); border: 1px solid var(--accent-border); }
+    .tree-item .icon { font-size: 13px; flex-shrink: 0; }
+    .tree-item .chevron {
+      width: 12px; height: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: var(--text3);
+      transition: transform var(--transition);
+    }
+    .tree-item.open .chevron { transform: rotate(90deg); }
+    .tree-children { display: none; }
+    .tree-children.open { display: block; }
+    .tree-item .filename { overflow: hidden; text-overflow: ellipsis; }
+    #file-stats {
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--text3);
+      border-top: 1px solid var(--border);
+      background: var(--bg1);
+    }
+
+    /* ── Feed Panel ────────────────────────────────────────────── */
+    #feed-panel { background: var(--bg0); }
+    #feed-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .feed-welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+      color: var(--text3);
+      text-align: center;
+    }
+    .feed-welcome .welcome-icon { font-size: 40px; }
+    .feed-welcome h2 { font-size: 18px; color: var(--text2); font-weight: 600; }
+    .feed-welcome p { font-size: 13px; max-width: 280px; line-height: 1.6; }
+    /* Feed cards */
+    .feed-card {
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: slideIn 0.2s ease;
+      flex-shrink: 0;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .feed-card-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg2);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text1);
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .feed-card-header .badge {
+      padding: 2px 8px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-phase { background: var(--accent-bg); color: var(--accent-light); border: 1px solid var(--accent-border); }
+    .badge-running { background: var(--yellow-bg); color: var(--yellow); }
+    .badge-done { background: var(--green-bg); color: var(--green); }
+    .badge-error { background: var(--red-bg); color: var(--red); }
+    .badge-review { background: var(--blue-bg); color: var(--blue); }
+    .badge-files { background: var(--green-bg); color: var(--green); }
+    .feed-card-body { padding: 12px 14px; font-size: 13px; line-height: 1.65; color: var(--text1); }
+    .feed-card-body pre {
+      background: var(--bg0);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      overflow-x: auto;
+      font-size: 12px;
+      margin-top: 8px;
+      font-family: var(--font-mono);
+    }
+    .review-grid {
+      display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;
+      align-items: center; margin-bottom: 8px;
+    }
+    .review-label { font-size: 11px; color: var(--text2); font-weight: 600; text-transform: uppercase; }
+    .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .score-bar {
+      height: 6px; background: var(--bg2);
+      border-radius: 3px; flex: 1; overflow: hidden;
+    }
+    .score-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      transition: width 0.6s ease;
+    }
+    .score-num { font-size: 12px; font-weight: 700; color: var(--text0); min-width: 24px; }
+    .phase-msg {
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text1);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .phase-msg .spinner {
+      width: 14px; height: 14px; border: 2px solid var(--bg3);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.8s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .task-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .task-list li {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 10px; border-radius: 6px;
+      background: var(--bg0); font-size: 12px;
+    }
+    .task-list li .task-num {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--bg2); color: var(--text2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; flex-shrink: 0;
+    }
+    .task-list li .task-info { flex: 1; }
+    .task-list li .task-title { font-weight: 600; color: var(--text0); margin-bottom: 2px; }
+    .task-list li .task-type {
+      font-size: 10px; padding: 1px 6px; border-radius: 10px;
+      display: inline-block;
+    }
+    .type-code { background: var(--accent-bg); color: var(--accent-light); }
+    .type-research { background: var(--blue-bg); color: var(--blue); }
+    .type-design { background: var(--yellow-bg); color: var(--yellow); }
+    .type-content { background: var(--green-bg); color: var(--green); }
+    .type-review { background: rgba(248,81,73,0.08); color: var(--red); }
+    .type-other { background: var(--bg2); color: var(--text2); }
+    .task-output-text {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text0);
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--bg0);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .task-output-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-light);
+      margin-bottom: 6px;
+    }
+    .output-more { font-size: 11px; color: var(--text3); margin-left: 4px; }
+    .summary-box {
+      background: linear-gradient(135deg, var(--accent-bg), transparent);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius); padding: 16px;
+      font-size: 13px; line-height: 1.7; color: var(--text0);
+    }
+    /* File list in feed */
+    .file-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .file-chip {
+      display: flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 4px;
+      background: var(--bg0); border: 1px solid var(--border);
+      font-size: 11px; font-family: var(--font-mono); color: var(--text1);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .file-chip:hover { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent-light); }
+
+    /* ── Preview Panel ─────────────────────────────────────────── */
+    #preview-panel { background: var(--bg0); }
+    #preview-tabs {
+      display: flex;
+      padding: 0 8px;
+      gap: 2px;
+      background: var(--bg1);
+      border-bottom: 1px solid var(--border);
+      height: 38px;
+      align-items: flex-end;
+    }
+    .preview-tab {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      border: none; background: transparent;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all var(--transition);
+    }
+    .preview-tab:hover { color: var(--text0); }
+    .preview-tab.active { color: var(--accent-light); border-bottom-color: var(--accent-light); }
+    #preview-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    /* Preview Tab */
+    #tab-preview {
+      display: flex; flex-direction: column; height: 100%;
+    }
+    #preview-toolbar {
+      padding: 8px 12px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg1);
+    }
+    #preview-url {
+      flex: 1; padding: 4px 10px;
+      background: var(--bg0); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text1); font-size: 12px;
+      font-family: var(--font-mono);
+    }
+    .small-btn {
+      padding: 4px 10px; border-radius: 6px;
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--text1); font-size: 12px; cursor: pointer;
+      transition: all var(--transition);
+    }
+    .small-btn:hover { background: var(--bg3); color: var(--text0); }
+    .small-btn.primary {
+      background: var(--accent-bg); border-color: var(--accent-border);
+      color: var(--accent-light);
+    }
+    .small-btn.primary:hover { background: var(--accent); color: #fff; }
+    #preview-iframe-wrap { flex: 1; position: relative; overflow: hidden; }
+    #preview-iframe {
+      width: 100%; height: 100%; border: none;
+      background: white;
+    }
+    #preview-placeholder {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100%; gap: 12px;
+      color: var(--text3); text-align: center;
+      padding: 24px;
+    }
+    #preview-placeholder .ph-icon { font-size: 36px; }
+    #preview-placeholder h3 { font-size: 14px; color: var(--text2); }
+    #preview-placeholder p { font-size: 12px; line-height: 1.6; max-width: 240px; }
+    /* Code Tab */
+    #tab-code {
+      display: none; flex-direction: column; height: 100%;
+    }
+    #code-file-bar {
+      padding: 6px 10px;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg1);
+      min-height: 38px;
+    }
+    .code-file-tab {
+      padding: 3px 10px; border-radius: 4px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text2); font-size: 11px;
+      font-family: var(--font-mono); cursor: pointer;
+      transition: all var(--transition);
+    }
+    .code-file-tab:hover { background: var(--bg2); color: var(--text0); }
+    .code-file-tab.active { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent-light); }
+    #code-viewer {
+      flex: 1; overflow: auto;
+      background: var(--bg0);
+    }
+    #code-viewer pre { margin: 0; border-radius: 0; font-size: 12px; min-height: 100%; }
+    #code-viewer code { font-family: var(--font-mono); }
+    /* Deps Tab */
+    #tab-deps {
+      display: none; flex-direction: column;
+      padding: 16px; gap: 12px; overflow-y: auto;
+    }
+    .deps-section h4 {
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text2); margin-bottom: 8px;
+    }
+    .deps-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dep-chip {
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg1); font-size: 12px;
+      font-family: var(--font-mono); color: var(--text1);
+    }
+    .dep-npm { border-color: rgba(255,123,114,0.3); color: var(--orange); }
+    .dep-pip { border-color: rgba(88,166,255,0.3); color: var(--blue); }
+    #install-btn {
+      padding: 8px 16px; border-radius: var(--radius);
+      background: var(--accent); border: none;
+      color: #fff; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all var(--transition);
+      display: flex; align-items: center; gap: 6px;
+    }
+    #install-btn:hover { background: var(--accent-light); }
+    #install-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    #install-output {
+      background: var(--bg0); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px;
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text1); white-space: pre-wrap;
+      max-height: 200px; overflow-y: auto; display: none;
+    }
+    .deps-empty { color: var(--text3); font-size: 13px; text-align: center; padding: 24px; }
+    #run-info {
+      background: var(--bg1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px;
+    }
+    #run-info h4 { font-size: 12px; color: var(--text2); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    #run-info code {
+      display: block; padding: 8px 10px;
+      background: var(--bg0); border: 1px solid var(--border);
+      border-radius: 6px; font-family: var(--font-mono);
+      font-size: 12px; color: var(--green);
+    }
+
+    /* ── Footer / Input ────────────────────────────────────────── */
+    #footer {
+      background: var(--bg1);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    #idea-wrap {
+      flex: 1; position: relative;
+      background: var(--bg0);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      transition: border-color var(--transition);
+    }
+    #idea-wrap:focus-within { border-color: var(--accent); }
+    #idea-input {
+      width: 100%; padding: 10px 14px;
+      background: transparent; border: none; outline: none;
+      color: var(--text0); font-size: 14px;
+      resize: none; min-height: 44px; max-height: 140px;
+      line-height: 1.5; font-family: inherit;
+    }
+    #idea-input::placeholder { color: var(--text3); }
+    #char-count {
+      position: absolute; bottom: 8px; right: 10px;
+      font-size: 10px; color: var(--text3);
+    }
+    #forge-btn {
+      height: 44px; padding: 0 20px;
+      background: var(--accent); border: none; border-radius: var(--radius-lg);
+      color: #fff; font-size: 14px; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+      transition: all var(--transition);
+      box-shadow: 0 2px 8px rgba(124,58,237,0.35);
+    }
+    #forge-btn:hover:not(:disabled) {
+      background: var(--accent-light);
+      box-shadow: 0 4px 16px rgba(124,58,237,0.5);
+      transform: translateY(-1px);
+    }
+    #forge-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    #forge-btn .btn-spinner {
+      width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.8s linear infinite; display: none;
+    }
+
+    /* ── Settings Overlay ──────────────────────────────────────── */
+    #settings-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      display: none;
+    }
+    #settings-overlay.open { display: block; }
+    #settings-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.5);
+    }
+    #settings-panel {
+      position: absolute; top: 0; right: 0;
+      width: 360px; height: 100%;
+      background: var(--bg1);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      box-shadow: var(--shadow);
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+    #settings-overlay.open #settings-panel { transform: translateX(0); }
+    #settings-header {
+      height: 52px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700; font-size: 15px;
+    }
+    #settings-body { flex: 1; overflow-y: auto; padding: 20px 16px; }
+    .settings-section {
+      margin-bottom: 24px;
+    }
+    .settings-section h3 {
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--accent-light);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; }
+    .field select, .field input {
+      width: 100%; padding: 8px 10px;
+      background: var(--bg0); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text0);
+      font-size: 13px; outline: none;
+      transition: border-color var(--transition);
+    }
+    .field select:focus, .field input:focus { border-color: var(--accent); }
+    .field input[type="password"] { font-family: var(--font-mono); letter-spacing: 2px; }
+    .provider-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 20px;
+      font-size: 10px; font-weight: 600;
+      background: var(--green-bg); color: var(--green);
+      margin-left: 6px; vertical-align: middle;
+    }
+    .key-link { font-size: 11px; color: var(--accent-light); text-decoration: none; float: right; }
+    .key-link:hover { text-decoration: underline; }
+    #save-settings-btn {
+      width: 100%; padding: 10px;
+      background: var(--accent); border: none; border-radius: var(--radius);
+      color: #fff; font-size: 14px; font-weight: 600;
+      cursor: pointer; margin-top: 4px;
+      transition: background var(--transition);
+    }
+    #save-settings-btn:hover { background: var(--accent-light); }
+
+    /* ── Misc ──────────────────────────────────────────────────── */
+    .collapsible-body { display: none; }
+    .collapsible-body.open { display: block; }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────── -->
+<header id="header">
+  <div id="logo">
+    <span class="hammer">⚒</span>
+    <span>Idea<span class="smith">Smith</span></span>
+  </div>
+  <div id="header-spacer"></div>
+  <div id="phase-badge"><div class="pulse"></div><span id="phase-text">Planning</span></div>
+  <span id="session-info"></span>
+  <button class="header-btn" id="theme-btn" title="Toggle theme">🌙</button>
+  <button class="header-btn" id="settings-btn" title="Configure providers">⚙</button>
+</header>
+
+<!-- ── Settings Overlay ───────────────────────────────────────── -->
+<div id="settings-overlay">
+  <div id="settings-backdrop"></div>
+  <div id="settings-panel">
+    <div id="settings-header">
+      <span>⚙ Configuration</span>
+      <button class="icon-btn" id="close-settings-btn" style="width:28px;height:28px;font-size:16px">✕</button>
+    </div>
+    <div id="settings-body">
+      <div class="settings-section">
+        <h3>🧠 Manager AI <small style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(plans & reviews)</small></h3>
+        <div class="field">
+          <label>Provider</label>
+          <select id="mgr-provider"></select>
+        </div>
+        <div class="field">
+          <label>Model</label>
+          <select id="mgr-model"></select>
+        </div>
+        <div class="field">
+          <label>API Key <a class="key-link" id="mgr-key-link" href="#" target="_blank">Get key →</a></label>
+          <input type="password" id="mgr-key" placeholder="Paste API key here..." autocomplete="off">
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>👷 Developer AI <small style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(executes tasks)</small></h3>
+        <div class="field">
+          <label>Provider</label>
+          <select id="dev-provider"></select>
+        </div>
+        <div class="field">
+          <label>Model</label>
+          <select id="dev-model"></select>
+        </div>
+        <div class="field">
+          <label>API Key <a class="key-link" id="dev-key-link" href="#" target="_blank">Get key →</a></label>
+          <input type="password" id="dev-key" placeholder="Paste API key here..." autocomplete="off">
+        </div>
+      </div>
+      <button id="save-settings-btn">Save & Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main ───────────────────────────────────────────────────── -->
+<div id="main">
+
+  <!-- Left: File Explorer -->
+  <div class="panel" id="file-panel">
+    <div class="panel-header">
+      <span>📁 Project Files</span>
+      <div class="panel-header-actions">
+        <button class="icon-btn" id="collapse-all-btn" title="Collapse all">⊟</button>
+      </div>
+    </div>
+    <div id="file-tree-body">
+      <div class="tree-empty">
+        <span class="empty-icon">📂</span>
+        Run a project idea to see generated files here.
+      </div>
+    </div>
+    <div id="file-stats" style="display:none"></div>
+  </div>
+
+  <!-- Center: Activity Feed -->
+  <div class="panel" id="feed-panel">
+    <div class="panel-header">
+      <span>⚡ Activity Feed</span>
+      <div class="panel-header-actions">
+        <button class="icon-btn" id="clear-feed-btn" title="Clear feed">🗑</button>
+      </div>
+    </div>
+    <div id="feed-body">
+      <div class="feed-welcome">
+        <span class="welcome-icon">⚒</span>
+        <h2>Welcome to IdeaSmith</h2>
+        <p>Describe your project below and two AI agents will plan, build, and review it for you.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Preview Panel -->
+  <div class="panel" id="preview-panel">
+    <div id="preview-tabs">
+      <button class="preview-tab active" data-tab="preview">🖥 Preview</button>
+      <button class="preview-tab" data-tab="code">📄 Code</button>
+      <button class="preview-tab" data-tab="deps">📦 Dependencies</button>
+    </div>
+    <div id="preview-body">
+
+      <!-- Preview Tab -->
+      <div id="tab-preview">
+        <div id="preview-toolbar">
+          <input id="preview-url" readonly placeholder="No preview available">
+          <button class="small-btn" id="preview-refresh-btn" title="Reload">↺</button>
+          <button class="small-btn" id="preview-open-btn" title="Open in new tab">↗</button>
+        </div>
+        <div id="preview-iframe-wrap">
+          <div id="preview-placeholder">
+            <span class="ph-icon">🖥</span>
+            <h3>No Preview Yet</h3>
+            <p>HTML and React (CDN) projects will preview here automatically after generation.</p>
+          </div>
+          <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin allow-forms" style="display:none"></iframe>
+        </div>
+      </div>
+
+      <!-- Code Tab -->
+      <div id="tab-code">
+        <div id="code-file-bar">
+          <span style="font-size:12px;color:var(--text3)">No files yet</span>
+        </div>
+        <div id="code-viewer">
+          <pre><code class="text" style="padding:16px;display:block;color:var(--text3)">Select a file to view its contents.</code></pre>
+        </div>
+      </div>
+
+      <!-- Deps Tab -->
+      <div id="tab-deps">
+        <div class="deps-empty">No dependencies detected yet.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ─────────────────────────────────────────────────── -->
+<footer id="footer">
+  <div id="idea-wrap">
+    <textarea id="idea-input" rows="1" placeholder="Describe your project idea... (e.g. 'Build a todo app with React', 'Create a REST API with Flask')"></textarea>
+    <span id="char-count">0</span>
+  </div>
+  <button id="forge-btn">
+    <div class="btn-spinner" id="btn-spinner"></div>
+    <span id="btn-label">⚒ Forge</span>
+  </button>
+</footer>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+const state = {
+  sessionId: null,
+  providers: {},
+  running: false,
+  allFiles: {},        // path -> content cache
+  allDeps: { npm: [], pip: [] },
+  runCommand: '',
+  entryPoint: '',
+  projectType: '',
+  activeCodeFile: null,
+  activePreviewUrl: null,
+  theme: localStorage.getItem('theme') || 'dark',
+};
+
+// ── DOM refs ───────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const feedBody       = $('feed-body');
+const fileTreeBody   = $('file-tree-body');
+const forgeBtn       = $('forge-btn');
+const ideaInput      = $('idea-input');
+const btnSpinner     = $('btn-spinner');
+const btnLabel       = $('btn-label');
+const phaseBadge     = $('phase-badge');
+const phaseText      = $('phase-text');
+const codeViewer     = $('code-viewer');
+const codeFileBar    = $('code-file-bar');
+const previewIframe  = $('preview-iframe');
+const previewPlaceholder = $('preview-placeholder');
+const previewUrl     = $('preview-url');
+const installOutput  = $('install-output');
+
+// ── Theme ──────────────────────────────────────────────────────
+function applyTheme(t) {
+  state.theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  $('theme-btn').textContent = t === 'dark' ? '☀' : '🌙';
+  const hljsLink = $('hljs-theme');
+  hljsLink.href = t === 'dark'
+    ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+    : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  localStorage.setItem('theme', t);
+}
+applyTheme(state.theme);
+$('theme-btn').addEventListener('click', () => applyTheme(state.theme === 'dark' ? 'light' : 'dark'));
+
+// ── Preview Tabs ───────────────────────────────────────────────
+document.querySelectorAll('.preview-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preview-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    $('tab-preview').style.display = tab === 'preview' ? 'flex' : 'none';
+    $('tab-code').style.display = tab === 'code' ? 'flex' : 'none';
+    $('tab-deps').style.display = tab === 'deps' ? 'flex' : 'none';
+  });
+});
+
+// ── Settings Panel ─────────────────────────────────────────────
+$('settings-btn').addEventListener('click', () => $('settings-overlay').classList.add('open'));
+$('close-settings-btn').addEventListener('click', () => $('settings-overlay').classList.remove('open'));
+$('settings-backdrop').addEventListener('click', () => $('settings-overlay').classList.remove('open'));
+$('save-settings-btn').addEventListener('click', () => { saveSettings(); $('settings-overlay').classList.remove('open'); });
+
+function populateProviderSelect(selectEl, modelSelectEl, keyLinkEl) {
+  selectEl.innerHTML = '';
+  Object.entries(state.providers).forEach(([key, p]) => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = p.label + (p.free ? ' ★ Free' : '');
+    selectEl.appendChild(opt);
+  });
+  selectEl.addEventListener('change', () => {
+    updateModelSelect(selectEl.value, modelSelectEl);
+    if (keyLinkEl) {
+      keyLinkEl.href = state.providers[selectEl.value]?.get_key_url || '#';
+    }
+  });
+  // Restore saved
+  const saved = localStorage.getItem(selectEl.id + '-val');
+  if (saved && state.providers[saved]) selectEl.value = saved;
+  updateModelSelect(selectEl.value, modelSelectEl);
+  if (keyLinkEl) keyLinkEl.href = state.providers[selectEl.value]?.get_key_url || '#';
+}
+
+function updateModelSelect(providerKey, modelSelect) {
+  modelSelect.innerHTML = '';
+  const models = state.providers[providerKey]?.models || [];
+  models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m; opt.textContent = m;
+    modelSelect.appendChild(opt);
+  });
+  const savedModel = localStorage.getItem(modelSelect.id + '-val');
+  if (savedModel && models.includes(savedModel)) modelSelect.value = savedModel;
+}
+
+function saveSettings() {
+  ['mgr-provider', 'mgr-model', 'dev-provider', 'dev-model'].forEach(id => {
+    localStorage.setItem(id + '-val', $(id).value);
+  });
+}
+
+async function initProviders() {
+  try {
+    const res = await fetch('/providers');
+    state.providers = await res.json();
+    populateProviderSelect($('mgr-provider'), $('mgr-model'), $('mgr-key-link'));
+    populateProviderSelect($('dev-provider'), $('dev-model'), $('dev-key-link'));
+    // Restore keys
+    const mgrKey = localStorage.getItem('mgr-key-val');
+    const devKey = localStorage.getItem('dev-key-val');
+    if (mgrKey) $('mgr-key').value = mgrKey;
+    if (devKey) $('dev-key').value = devKey;
+  } catch (e) {
+    console.error('Failed to load providers', e);
+  }
+}
+
+// ── Idea Input auto-resize ─────────────────────────────────────
+ideaInput.addEventListener('input', () => {
+  ideaInput.style.height = 'auto';
+  ideaInput.style.height = Math.min(ideaInput.scrollHeight, 140) + 'px';
+  $('char-count').textContent = ideaInput.value.length;
+});
+ideaInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); startForge(); }
+});
+
+// ── Feed helpers ───────────────────────────────────────────────
+let welcomeShown = true;
+function addFeedCard(html, animate = true) {
+  if (welcomeShown) { feedBody.innerHTML = ''; welcomeShown = false; }
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = html;
+  const card = wrapper.firstElementChild;
+  if (animate) card.style.animation = 'slideIn 0.2s ease';
+  feedBody.appendChild(card);
+  feedBody.scrollTop = feedBody.scrollHeight;
+  return card;
+}
+
+function addPhaseMsg(msg) {
+  addFeedCard(`<div class="phase-msg"><div class="spinner"></div><span>${escHtml(msg)}</span></div>`);
+}
+
+function addTaskList(tasks) {
+  const items = tasks.map(t => `
+    <li>
+      <div class="task-num">${t.id}</div>
+      <div class="task-info">
+        <div class="task-title">${escHtml(t.title)}</div>
+        <span class="task-type type-${t.type || 'other'}">${t.type || 'other'}</span>
+      </div>
+    </li>`).join('');
+  addFeedCard(`
+    <div class="feed-card">
+      <div class="feed-card-header">
+        <span>📋 Task Plan</span>
+        <span class="badge badge-phase">${tasks.length} tasks</span>
+      </div>
+      <div class="feed-card-body">
+        <ul class="task-list">${items}</ul>
+      </div>
+    </div>`);
+}
+
+function addTaskStart(taskId, title) {
+  const card = addFeedCard(`
+    <div class="feed-card" id="task-card-${taskId}">
+      <div class="feed-card-header">
+        <div class="spinner" style="width:12px;height:12px;border:2px solid var(--bg3);border-top-color:var(--yellow);border-radius:50%;animation:spin .8s linear infinite"></div>
+        <span>Task ${taskId}: ${escHtml(title)}</span>
+        <span class="badge badge-running">Running</span>
+      </div>
+    </div>`);
+  // Store direct reference — more reliable than getElementById
+  if (!state.taskCardMap) state.taskCardMap = {};
+  state.taskCardMap[String(taskId)] = card;
+  return card;
+}
+
+function updateTaskDone(taskId, output) {
+  try {
+    // Try direct reference first, fall back to getElementById
+    const card = (state.taskCardMap && state.taskCardMap[String(taskId)])
+               || document.getElementById('task-card-' + taskId);
+    if (!card) {
+      // Card not found — create a new one
+      addFeedCard(buildTaskDoneHTML(taskId, output));
+      return;
+    }
+
+    const header = card.querySelector('.feed-card-header');
+    if (header) header.innerHTML = `<span>✅ Task ${taskId}</span><span class="badge badge-done">Done</span>`;
+
+    // Remove existing body if any
+    const existingBody = card.querySelector('.feed-card-body');
+    if (existingBody) existingBody.remove();
+
+    const body = document.createElement('div');
+    body.className = 'feed-card-body';
+    body.innerHTML = buildTaskBodyHTML(output);
+    card.appendChild(body);
+    
+    // Ensure scroll to bottom
+    setTimeout(() => {
+      feedBody.scrollTop = feedBody.scrollHeight;
+    }, 0);
+  } catch (err) {
+    console.error('updateTaskDone error:', err, output);
+  }
+}
+
+function buildTaskDoneHTML(taskId, output) {
+  return `<div class="feed-card">
+    <div class="feed-card-header">
+      <span>✅ Task ${taskId}</span><span class="badge badge-done">Done</span>
+    </div>
+    <div class="feed-card-body">${buildTaskBodyHTML(output)}</div>
+  </div>`;
+}
+
+function buildTaskBodyHTML(output) {
+  try {
+    // Normalize: handle string output (legacy), null, or proper {type, content/project}
+    if (!output) return '<span style="color:var(--text3)">No output</span>';
+
+    if (typeof output === 'string') {
+      const preview = output.slice(0, 400);
+      return `<div class="task-output-text">${escHtml(preview)}${output.length > 400 ? '<span class="output-more">…</span>' : ''}</div>`;
+    }
+
+    if (output.type === 'files' && output.project) {
+      const proj = output.project;
+      const fileChips = (proj.files || []).map(f =>
+        `<span class="file-chip" onclick="viewFileFromPath('${escAttr(f.path)}')">${fileIcon(f.path)} ${escHtml(f.path)}</span>`
+      ).join('');
+      return `
+        <div class="task-output-label">📦 ${escHtml(proj.project_type || 'project')} · ${proj.files?.length || 0} files generated</div>
+        <div style="font-size:13px;color:var(--text1);margin-bottom:8px">${escHtml(proj.description || '')}</div>
+        <div class="file-chips">${fileChips}</div>`;
+    }
+
+    // Plain text output
+    const text = output.content || output.text || JSON.stringify(output);
+    const preview = String(text).slice(0, 500);
+    const hasMore = String(text).length > 500;
+    return `<div class="task-output-text">${escHtml(preview)}${hasMore ? '<span class="output-more"> …(truncated)</span>' : ''}</div>`;
+
+  } catch (err) {
+    return `<span style="color:var(--red)">Render error: ${escHtml(String(err))}</span>`;
+  }
+}
+
+function addReview(review) {
+  const approved = review.approved;
+  const score = review.score || 0;
+  const fill = (score / 10 * 100).toFixed(0);
+  addFeedCard(`
+    <div class="feed-card">
+      <div class="feed-card-header">
+        <span>${approved ? '✅' : '❌'} Review — Task ${review.task_id}</span>
+        <span class="badge badge-review">${approved ? 'Approved' : 'Rejected'}</span>
+      </div>
+      <div class="feed-card-body">
+        <div class="review-grid">
+          <span class="review-label">Score</span>
+          <div class="score-bar-wrap">
+            <div class="score-bar"><div class="score-fill" style="width:${fill}%"></div></div>
+            <span class="score-num">${score}/10</span>
+          </div>
+          <span class="review-label">Feedback</span>
+          <span style="font-size:13px;color:var(--text1)">${escHtml(review.feedback || '')}</span>
+        </div>
+      </div>
+    </div>`);
+}
+
+function addSummary(text) {
+  addFeedCard(`
+    <div class="feed-card">
+      <div class="feed-card-header"><span>🏁 Project Summary</span><span class="badge badge-done">Complete</span></div>
+      <div class="feed-card-body"><div class="summary-box">${escHtml(text)}</div></div>
+    </div>`);
+}
+
+function addError(msg) {
+  addFeedCard(`
+    <div class="feed-card">
+      <div class="feed-card-header"><span>❌ Error</span><span class="badge badge-error">Failed</span></div>
+      <div class="feed-card-body" style="color:var(--red)">${escHtml(msg)}</div>
+    </div>`);
+}
+
+function addFilesUpdated(tree, project, taskId) {
+  const count = project.files?.length || 0;
+  addFeedCard(`
+    <div class="feed-card">
+      <div class="feed-card-header"><span>📁 Files Generated</span><span class="badge badge-files">${count} files</span></div>
+      <div class="feed-card-body" style="font-size:12px;color:var(--text2)">
+        Project saved to workspace. Open the <strong>Code</strong> or <strong>Preview</strong> tab to explore.
+      </div>
+    </div>`);
+}
+
+// ── File Tree ──────────────────────────────────────────────────
+function renderFileTree(tree) {
+  if (!tree || tree.length === 0) return;
+  fileTreeBody.innerHTML = '';
+  const container = document.createElement('div');
+  renderTreeNodes(tree, container, 0);
+  fileTreeBody.appendChild(container);
+  const total = countFiles(tree);
+  $('file-stats').style.display = '';
+  $('file-stats').textContent = `${total} file${total !== 1 ? 's' : ''}`;
+}
+
+function countFiles(tree) {
+  return tree.reduce((n, node) => node.type === 'dir' ? n + countFiles(node.children || []) : n + 1, 0);
+}
+
+function renderTreeNodes(nodes, container, depth) {
+  nodes.forEach(node => {
+    const item = document.createElement('div');
+    item.className = 'tree-item';
+    item.style.paddingLeft = (8 + depth * 14) + 'px';
+
+    if (node.type === 'dir') {
+      item.innerHTML = `<span class="chevron">▶</span><span class="icon">📁</span><span class="filename">${escHtml(node.name)}</span>`;
+      const children = document.createElement('div');
+      children.className = 'tree-children';
+      renderTreeNodes(node.children || [], children, depth + 1);
+      item.addEventListener('click', e => {
+        e.stopPropagation();
+        item.classList.toggle('open');
+        children.classList.toggle('open');
+        item.querySelector('.icon').textContent = item.classList.contains('open') ? '📂' : '📁';
+      });
+      container.appendChild(item);
+      container.appendChild(children);
+    } else {
+      item.innerHTML = `<span class="icon">${fileIcon(node.name)}</span><span class="filename">${escHtml(node.name)}</span>`;
+      item.addEventListener('click', () => viewFileFromPath(node.path));
+      container.appendChild(item);
+    }
+  });
+}
+
+function fileIcon(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const icons = {
+    js: '🟨', jsx: '⚛', ts: '🔷', tsx: '⚛',
+    html: '🌐', css: '🎨', scss: '🎨', less: '🎨',
+    py: '🐍', json: '📋', md: '📝', txt: '📄',
+    env: '🔒', gitignore: '🙈', sh: '⚙',
+    png: '🖼', jpg: '🖼', svg: '🖼', gif: '🖼',
+    sql: '🗄', yaml: '⚙', yml: '⚙', toml: '⚙',
+    requirements: '📦', dockerfile: '🐳',
+  };
+  return icons[ext] || '📄';
+}
+
+async function viewFileFromPath(filePath) {
+  if (!state.sessionId) return;
+  // Highlight active in tree
+  document.querySelectorAll('.tree-item').forEach(i => {
+    if (i.querySelector('.filename')?.textContent === filePath.split('/').pop()) {
+      // rough match — good enough
+    }
+    i.classList.remove('active');
+  });
+
+  // Switch to code tab
+  document.querySelectorAll('.preview-tab').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-tab="code"]').classList.add('active');
+  $('tab-preview').style.display = 'none';
+  $('tab-code').style.display = 'flex';
+  $('tab-deps').style.display = 'none';
+
+  try {
+    const res = await fetch(`/project/${state.sessionId}/file/${filePath}`);
+    const data = await res.json();
+    const content = data.content || '';
+    state.allFiles[filePath] = content;
+    state.activeCodeFile = filePath;
+    showCodeContent(filePath, content);
+  } catch (e) {
+    codeViewer.innerHTML = `<pre><code style="color:var(--red);padding:16px;display:block">${escHtml(String(e))}</code></pre>`;
+  }
+}
+
+function showCodeContent(filePath, content) {
+  const ext = filePath.split('.').pop().toLowerCase();
+  const langMap = {
+    js: 'javascript', jsx: 'javascript', ts: 'typescript', tsx: 'typescript',
+    py: 'python', html: 'html', css: 'css', json: 'json',
+    md: 'markdown', sh: 'bash', yml: 'yaml', yaml: 'yaml',
+  };
+  const lang = langMap[ext] || 'plaintext';
+  const code = document.createElement('code');
+  code.className = lang;
+  code.textContent = content;
+  const pre = document.createElement('pre');
+  pre.appendChild(code);
+  codeViewer.innerHTML = '';
+  codeViewer.appendChild(pre);
+  hljs.highlightElement(code);
+}
+
+function buildCodeFileTabs(files) {
+  codeFileBar.innerHTML = '';
+  files.forEach(f => {
+    const btn = document.createElement('button');
+    btn.className = 'code-file-tab';
+    btn.innerHTML = `${fileIcon(f.path)} ${f.path.split('/').pop()}`;
+    btn.title = f.path;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.code-file-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // Use cached or fetch
+      if (state.allFiles[f.path]) {
+        showCodeContent(f.path, state.allFiles[f.path]);
+      } else {
+        viewFileFromPath(f.path);
+      }
+    });
+    codeFileBar.appendChild(btn);
+  });
+  // Cache file contents
+  files.forEach(f => { state.allFiles[f.path] = f.content; });
+}
+
+// ── Preview ────────────────────────────────────────────────────
+function loadPreview(sessionId, entryPoint) {
+  if (!entryPoint) return;
+  const url = `/project/${sessionId}/preview/${entryPoint}`;
+  state.activePreviewUrl = url;
+  previewUrl.value = url;
+  previewIframe.src = url;
+  previewIframe.style.display = 'block';
+  previewPlaceholder.style.display = 'none';
+}
+
+$('preview-refresh-btn').addEventListener('click', () => {
+  if (state.activePreviewUrl) previewIframe.src = state.activePreviewUrl;
+});
+$('preview-open-btn').addEventListener('click', () => {
+  if (state.activePreviewUrl) window.open(state.activePreviewUrl, '_blank');
+});
+
+// ── Dependencies Tab ───────────────────────────────────────────
+function updateDepsTab(deps, runCommand) {
+  const tabDeps = $('tab-deps');
+  tabDeps.innerHTML = '';
+
+  const hasNpm = deps.npm?.length > 0;
+  const hasPip = deps.pip?.length > 0;
+  const hasDeps = hasNpm || hasPip;
+
+  if (!hasDeps) {
+    tabDeps.innerHTML = '<div class="deps-empty">✅ No external dependencies required.</div>';
+  } else {
+    if (hasNpm) {
+      const sec = document.createElement('div');
+      sec.className = 'deps-section';
+      sec.innerHTML = `<h4>npm Packages</h4><div class="deps-list">${
+        deps.npm.map(d => `<span class="dep-chip dep-npm">📦 ${escHtml(d)}</span>`).join('')
+      }</div>`;
+      tabDeps.appendChild(sec);
+    }
+    if (hasPip) {
+      const sec = document.createElement('div');
+      sec.className = 'deps-section';
+      sec.innerHTML = `<h4>pip Packages</h4><div class="deps-list">${
+        deps.pip.map(d => `<span class="dep-chip dep-pip">🐍 ${escHtml(d)}</span>`).join('')
+      }</div>`;
+      tabDeps.appendChild(sec);
+    }
+
+    const installBtn = document.createElement('button');
+    installBtn.id = 'install-btn';
+    installBtn.innerHTML = '⬇ Install Dependencies';
+    installBtn.addEventListener('click', () => installDeps(deps, installBtn));
+    tabDeps.appendChild(installBtn);
+
+    const out = document.createElement('pre');
+    out.id = 'install-output';
+    tabDeps.appendChild(out);
+  }
+
+  if (runCommand) {
+    const info = document.createElement('div');
+    info.id = 'run-info';
+    info.innerHTML = `<h4>▶ Run Command</h4><code>${escHtml(runCommand)}</code>`;
+    tabDeps.appendChild(info);
+  }
+}
+
+async function installDeps(deps, btn) {
+  if (!state.sessionId) return;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite"></div> Installing...';
+  const outEl = $('install-output') || document.createElement('pre');
+  outEl.style.display = 'block';
+  outEl.textContent = 'Installing...';
+
+  try {
+    const res = await fetch(`/project/${state.sessionId}/install`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dependencies: deps }),
+    });
+    const results = await res.json();
+    let text = '';
+    if (results.npm) text += `[npm]\n${results.npm.output}\n`;
+    if (results.pip) text += `[pip]\n${results.pip.output}\n`;
+    outEl.textContent = text || 'Done!';
+    btn.innerHTML = '✅ Installed';
+    btn.style.background = 'var(--green)';
+  } catch (e) {
+    outEl.textContent = 'Error: ' + e.message;
+    btn.disabled = false;
+    btn.innerHTML = '⬇ Retry';
+  }
+}
+
+// ── Main Forge Flow ────────────────────────────────────────────
+$('clear-feed-btn').addEventListener('click', () => {
+  if (state.running) return;
+  feedBody.innerHTML = `<div class="feed-welcome">
+    <span class="welcome-icon">⚒</span>
+    <h2>Welcome to IdeaSmith</h2>
+    <p>Describe your project below and two AI agents will plan, build, and review it for you.</p>
+  </div>`;
+  welcomeShown = true;
+});
+
+$('collapse-all-btn').addEventListener('click', () => {
+  document.querySelectorAll('.tree-item.open').forEach(i => i.classList.remove('open'));
+  document.querySelectorAll('.tree-children.open').forEach(c => c.classList.remove('open'));
+  document.querySelectorAll('.tree-item .icon').forEach(i => {
+    if (i.textContent === '📂') i.textContent = '📁';
+  });
+});
+
+async function startForge() {
+  const idea = ideaInput.value.trim();
+  if (!idea || state.running) return;
+
+  // Persist keys
+  localStorage.setItem('mgr-key-val', $('mgr-key').value);
+  localStorage.setItem('dev-key-val', $('dev-key').value);
+
+  // Clear the input field immediately
+  ideaInput.value = '';
+  ideaInput.style.height = 'auto';
+  $('char-count').textContent = '0';
+
+  state.running = true;
+  state.allFiles = {};
+  state.allDeps = { npm: [], pip: [] };
+  state.taskCardMap = {}; // store card refs by task id
+
+  forgeBtn.disabled = true;
+  btnSpinner.style.display = 'block';
+  btnLabel.textContent = 'Forging...';
+  phaseBadge.style.display = 'flex';
+
+  // Reset panels
+  fileTreeBody.innerHTML = '<div class="tree-empty"><span class="empty-icon">📂</span>Generating project files...</div>';
+  $('file-stats').style.display = 'none';
+  previewIframe.style.display = 'none';
+  previewPlaceholder.style.display = 'flex';
+  previewUrl.value = '';
+  codeFileBar.innerHTML = '<span style="font-size:12px;color:var(--text3)">No files yet</span>';
+  codeViewer.innerHTML = '<pre><code style="padding:16px;display:block;color:var(--text3)">Files will appear here after generation.</code></pre>';
+  $('tab-deps').innerHTML = '<div class="deps-empty">No dependencies detected yet.</div>';
+
+  const body = {
+    idea,
+    manager_provider: $('mgr-provider').value,
+    manager_key:      $('mgr-key').value,
+    manager_model:    $('mgr-model').value,
+    developer_provider: $('dev-provider').value,
+    developer_key:    $('dev-key').value,
+    developer_model:  $('dev-model').value,
+  };
+
+  try {
+    const res = await fetch('/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      addError(err.error || 'Request failed');
+      finishForge();
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split('\n\n');
+      buffer = parts.pop();
+      parts.forEach(part => processSSE(part.trim()));
+    }
+  } catch (e) {
+    addError(e.message || 'Network error');
+  } finally {
+    finishForge();
+  }
+}
+
+function processSSE(raw) {
+  if (!raw) return;
+  const lines = raw.split('\n');
+  let event = 'message', data = '';
+  lines.forEach(l => {
+    if (l.startsWith('event: ')) event = l.slice(7).trim();
+    else if (l.startsWith('data: ')) data = l.slice(6).trim();
+  });
+  if (!data) return;
+
+  let payload;
+  try { payload = JSON.parse(data); } catch { return; }
+
+  switch (event) {
+    case 'session':
+      state.sessionId = payload.session_id;
+      $('session-info').textContent = 'Session: ' + payload.session_id.slice(0, 8);
+      $('session-info').style.display = '';
+      break;
+    case 'phase':
+      phaseText.textContent = capitalise(payload.phase);
+      addPhaseMsg(payload.message);
+      break;
+    case 'tasks':
+      addTaskList(payload.tasks);
+      break;
+    case 'task_start':
+      addTaskStart(payload.task_id, payload.title);
+      break;
+    case 'task_done':
+      updateTaskDone(payload.task_id, payload.output);
+      break;
+    case 'files_updated': {
+      const proj = payload.project;
+      // Render file tree
+      renderFileTree(payload.tree);
+      addFilesUpdated(payload.tree, proj, payload.task_id);
+      // Update code tabs
+      buildCodeFileTabs(proj.files || []);
+      // Update deps tab
+      const deps = proj.dependencies || { npm: [], pip: [] };
+      state.allDeps.npm.push(...(deps.npm || []));
+      state.allDeps.pip.push(...(deps.pip || []));
+      updateDepsTab(state.allDeps, proj.run_command);
+      state.runCommand = proj.run_command;
+      state.entryPoint = proj.entry_point;
+      state.projectType = proj.project_type;
+      // Auto-preview
+      const previewable = ['html', 'react-cdn', 'react'].includes(proj.project_type);
+      if (previewable && proj.entry_point) {
+        loadPreview(state.sessionId, proj.entry_point);
+      }
+      break;
+    }
+    case 'review':
+      addReview(payload);
+      break;
+    case 'summary':
+      addSummary(payload.text);
+      break;
+    case 'done':
+      finishForge();
+      break;
+    case 'error':
+      addError(payload.message);
+      break;
+  }
+}
+
+function finishForge() {
+  state.running = false;
+  forgeBtn.disabled = false;
+  btnSpinner.style.display = 'none';
+  btnLabel.textContent = '⚒ Forge';
+  phaseBadge.style.display = 'none';
+}
+
+forgeBtn.addEventListener('click', startForge);
+
+// ── Utilities ──────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) { return String(s).replace(/'/g, "\\'"); }
+function capitalise(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
+
+// ── Init ───────────────────────────────────────────────────────
+initProviders();
+</script>
+</body>
+</html>

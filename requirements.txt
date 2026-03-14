@@ -1,0 +1,13 @@
+# Core
+anthropic>=0.40.0
+flask>=3.0.0
+python-dotenv>=1.0.0
+
+# Free tier providers (recommended for testing)
+groq>=0.9.0
+
+# Optional paid providers — install only what you use
+# openai>=1.30.0
+# google-generativeai>=0.7.0
+# mistralai>=1.0.0
+# cohere>=5.0.0
