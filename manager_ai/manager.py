@@ -33,7 +33,7 @@ DEVELOPER OUTPUT:
 Review this output. Decide:
 1. Is it approved? (true/false)
 2. Quality score from 1 to 10
-3. Brief feedback (1-2 sentences)
+3. Specific feedback for improvement (be constructive and actionable)
 
 Respond ONLY with valid JSON. No markdown. Example:
 {{
@@ -46,6 +46,25 @@ Respond ONLY with valid JSON. No markdown. Example:
         result = extract_json(raw)
         result["task_id"] = task["id"]
         return result
+
+    def generate_improvement_prompt(self, task: dict, previous_output: str, feedback: str) -> str:
+        """Generate a prompt for the developer to improve based on feedback."""
+        return f"""You are improving a previous work submission based on manager feedback.
+
+ORIGINAL TASK:
+Title: {task['title']}
+Description: {task['description']}
+Type: {task['type']}
+
+PREVIOUS OUTPUT:
+{previous_output}
+
+MANAGER FEEDBACK FOR IMPROVEMENT:
+{feedback}
+
+Please revise and improve your work based on the feedback above. 
+Keep what was good, address the specific issues mentioned.
+Respond with the improved version in the same format as before."""
 
     def generate_summary(self, idea: str, results: list[dict]) -> str:
         approved = [r for r in results if r.get("approved")]

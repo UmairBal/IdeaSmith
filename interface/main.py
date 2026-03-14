@@ -101,46 +101,113 @@ def run():
             })
 
             dev_results = []
-            for task in tasks:
-                yield from emit("task_start", {"task_id": task["id"], "title": task["title"]})
-                result = developer.execute_tasks([task])[0]
-                output = result["output"]
+            iteration = 0
+            max_iterations = 3  # Prevent infinite loops
+            all_approved = False
+            feedback_dict = {}  # Store feedback per task for next iteration
 
-                # Save files if this is a code task with file output
-                if output.get("type") == "files" and output.get("project", {}).get("files"):
-                    project = output["project"]
-                    save_files(session_id, project["files"])
-                    tree = get_file_tree(session_id)
-                    yield from emit("files_updated", {
-                        "tree": tree,
-                        "project": project,
-                        "task_id": task["id"],
+            while not all_approved and iteration < max_iterations:
+                iteration += 1
+                if iteration > 1:
+                    yield from emit("phase", {
+                        "phase": "iteration",
+                        "message": f"Iteration {iteration}/{max_iterations}: Developer AI is improving based on feedback..."
                     })
 
-                dev_results.append(result)
-                yield from emit("task_done", {
-                    "task_id": task["id"],
-                    "output": output,
+                dev_results = []
+                for task in tasks:
+                    # On first iteration, show task_start; on subsequent, show improvement notice
+                    if iteration == 1:
+                        yield from emit("task_start", {"task_id": task["id"], "title": task["title"]})
+                    else:
+                        yield from emit("task_improvement", {
+                            "task_id": task["id"],
+                            "title": task["title"],
+                            "iteration": iteration
+                        })
+
+                    # Pass feedback if this is not the first iteration
+                    feedback = feedback_dict.get(task["id"]) if iteration > 1 else None
+                    result = developer.execute_tasks([task], feedback=feedback)[0]
+                    output = result["output"]
+
+                    # Save files if this is a code task with file output
+                    if output.get("type") == "files" and output.get("project", {}).get("files"):
+                        project = output["project"]
+                        save_files(session_id, project["files"])
+                        tree = get_file_tree(session_id)
+                        yield from emit("files_updated", {
+                            "tree": tree,
+                            "project": project,
+                            "task_id": task["id"],
+                        })
+
+                    dev_results.append(result)
+                    yield from emit("task_done", {
+                        "task_id": task["id"],
+                        "output": output,
+                        "iteration": iteration
+                    })
+
+                # Review all outputs
+                yield from emit("phase", {
+                    "phase": "reviewing",
+                    "message": f"Manager AI is reviewing outputs (iteration {iteration})..."
                 })
 
-            yield from emit("phase", {"phase": "reviewing", "message": "Manager AI is reviewing outputs..."})
+                reviews = []
+                feedback_dict = {}  # Reset for next iteration
+                for result in dev_results:
+                    output = result["output"]
+                    review_content = (
+                        output["project"].get("description", "Code project generated.")
+                        if output.get("type") == "files"
+                        else output.get("content", "")
+                    )
+                    review = manager.review_output(result["task"], review_content)
+                    reviews.append(review)
+                    
+                    # Store feedback for next iteration
+                    if not review.get("approved"):
+                        feedback_dict[result["task"]["id"]] = review.get("feedback", "Improve the work.")
+                    
+                    yield from emit("review", review)
 
-            reviews = []
-            for result in dev_results:
-                output = result["output"]
-                review_content = (
-                    output["project"].get("description", "Code project generated.")
-                    if output.get("type") == "files"
-                    else output.get("content", "")
-                )
-                review = manager.review_output(result["task"], review_content)
-                reviews.append(review)
-                yield from emit("review", review)
+                # Check if all approved
+                all_approved = all(r.get("approved", False) for r in reviews)
+
+                if not all_approved and iteration < max_iterations:
+                    # Send feedback for next iteration
+                    feedback_summary = "\n".join([
+                        f"Task {r['task_id']}: {r.get('feedback', 'No feedback')}"
+                        for r in reviews if not r.get("approved")
+                    ])
+                    yield from emit("phase", {
+                        "phase": "feedback",
+                        "message": "Manager AI is providing feedback for improvements...",
+                        "feedback": feedback_summary
+                    })
+
+            # If not all approved after max iterations, indicate completion with notes
+            if not all_approved:
+                yield from emit("phase", {
+                    "phase": "partial_complete",
+                    "message": "Reached maximum iterations. Review results below."
+                })
 
             yield from emit("phase", {"phase": "summary", "message": "Generating project summary..."})
             summary = manager.generate_summary(idea, reviews)
-            yield from emit("summary", {"text": summary})
-            yield from emit("done", {"message": "IdeaSmith complete!", "session_id": session_id})
+            yield from emit("summary", {
+                "text": summary,
+                "iterations": iteration,
+                "all_approved": all_approved
+            })
+            yield from emit("done", {
+                "message": "IdeaSmith complete!",
+                "session_id": session_id,
+                "iterations": iteration,
+                "fully_approved": all_approved
+            })
 
         except Exception as e:
             yield from emit("error", {"message": str(e)})

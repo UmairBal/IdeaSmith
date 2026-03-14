@@ -207,3 +207,67 @@ Complete this task thoroughly, specifically, and with high quality. Format your 
 
     content = client.complete(prompt, max_tokens=max_tokens)
     return {"type": "text", "content": content}
+
+
+def improve_task(task: dict, feedback: str, client: AIClient) -> dict:
+    """
+    Improve a task based on manager feedback.
+    Uses the same execution strategy as execute_task but with improvement context.
+    """
+    task_type = task.get("type", "other")
+    max_tokens = TYPE_MAX_TOKENS.get(task_type, 2000)
+
+    if task_type == "code":
+        prompt = f"""{CODE_PROMPT.format(
+            title=task["title"],
+            description=task["description"],
+        )}
+
+MANAGER FEEDBACK FOR IMPROVEMENT:
+{feedback}
+
+Please revise and improve your implementation based on the feedback above.
+Keep what works well, but fix the issues mentioned.
+Follow the same output format (PROJECT_TYPE, DESCRIPTION, etc. followed by ===FILE:...===END=== blocks)."""
+        raw = client.complete(prompt, max_tokens=max_tokens)
+
+        # Strategy 1: Try the FILE SEPARATOR format
+        try:
+            project_data = _parse_file_format(raw)
+            if project_data["files"]:
+                return {"type": "files", "project": project_data}
+        except Exception:
+            pass
+
+        # Strategy 2: Try JSON
+        project_data = _try_json_parse(raw)
+        if project_data:
+            project_data.setdefault("files", [])
+            project_data.setdefault("dependencies", {"npm": [], "pip": []})
+            project_data.setdefault("project_type", "other")
+            project_data.setdefault("entry_point", "")
+            project_data.setdefault("run_command", "")
+            return {"type": "files", "project": project_data}
+
+        # Strategy 3: Fallback
+        project_data = _fallback_single_file(raw, task["title"])
+        return {"type": "files", "project": project_data}
+
+    # Non-code tasks
+    instruction = TYPE_INSTRUCTIONS.get(task_type, TYPE_INSTRUCTIONS["other"])
+    prompt = f"""You are improving your previous work based on manager feedback.
+
+TASK TITLE: {task['title']}
+TASK DESCRIPTION: {task['description']}
+TASK TYPE: {task_type}
+
+INSTRUCTIONS: {instruction}
+
+MANAGER FEEDBACK:
+{feedback}
+
+Please revise and improve your work. Keep what was good, address the specific issues mentioned.
+Format your response clearly."""
+
+    content = client.complete(prompt, max_tokens=max_tokens)
+    return {"type": "text", "content": content}
