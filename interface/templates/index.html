@@ -335,12 +335,34 @@
       font-size: 13px;
       color: var(--text1);
       display: flex; align-items: center; gap: 10px;
+      transition: border-color 0.3s, opacity 0.3s;
+    }
+    .phase-msg.phase-done {
+      border-left-color: var(--green);
+      opacity: 0.7;
+    }
+    .phase-msg.phase-done span:not(.phase-check) { color: var(--text2); }
+    .phase-check {
+      width: 18px; height: 18px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green); font-size: 14px; font-weight: 700;
     }
     .phase-msg .spinner {
       width: 14px; height: 14px; border: 2px solid var(--bg3);
       border-top-color: var(--accent); border-radius: 50%;
       animation: spin 0.8s linear infinite; flex-shrink: 0;
     }
+    .done-banner {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, rgba(63,185,80,0.12), rgba(63,185,80,0.04));
+      border: 1px solid rgba(63,185,80,0.35);
+      border-radius: var(--radius);
+      animation: slideIn 0.3s ease;
+    }
+    .done-icon { font-size: 28px; flex-shrink: 0; }
+    .done-title { font-size: 14px; font-weight: 700; color: var(--green); margin-bottom: 3px; }
+    .done-sub { font-size: 12px; color: var(--text2); }
     @keyframes spin { to { transform: rotate(360deg); } }
     .task-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
     .task-list li {
@@ -968,7 +990,26 @@ function addFeedCard(html, animate = true) {
 }
 
 function addPhaseMsg(msg) {
-  addFeedCard(`<div class="phase-msg"><div class="spinner"></div><span>${escHtml(msg)}</span></div>`);
+  // Mark the previous phase card as done
+  const prev = feedBody.querySelector('.phase-msg.active');
+  if (prev) {
+    prev.classList.remove('active');
+    prev.classList.add('phase-done');
+    const sp = prev.querySelector('.spinner');
+    if (sp) sp.outerHTML = '<span class="phase-check">✓</span>';
+  }
+  const card = addFeedCard(`<div class="phase-msg active"><div class="spinner"></div><span>${escHtml(msg)}</span></div>`);
+  return card;
+}
+
+function resolveLastPhase() {
+  const prev = feedBody.querySelector('.phase-msg.active');
+  if (prev) {
+    prev.classList.remove('active');
+    prev.classList.add('phase-done');
+    const sp = prev.querySelector('.spinner');
+    if (sp) sp.outerHTML = '<span class="phase-check">✓</span>';
+  }
 }
 
 function addTaskList(tasks) {
@@ -1029,11 +1070,7 @@ function updateTaskDone(taskId, output) {
     body.className = 'feed-card-body';
     body.innerHTML = buildTaskBodyHTML(output);
     card.appendChild(body);
-    
-    // Ensure scroll to bottom
-    setTimeout(() => {
-      feedBody.scrollTop = feedBody.scrollHeight;
-    }, 0);
+    feedBody.scrollTop = feedBody.scrollHeight;
   } catch (err) {
     console.error('updateTaskDone error:', err, output);
   }
@@ -1508,6 +1545,14 @@ function processSSE(raw) {
       addSummary(payload.text);
       break;
     case 'done':
+      resolveLastPhase();
+      addFeedCard(`<div class="done-banner">
+        <span class="done-icon">🎉</span>
+        <div>
+          <div class="done-title">Project Complete!</div>
+          <div class="done-sub">${escHtml(payload.message || 'IdeaSmith has finished building your project.')}</div>
+        </div>
+      </div>`);
       finishForge();
       break;
     case 'error':
